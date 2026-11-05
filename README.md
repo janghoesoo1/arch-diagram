@@ -62,7 +62,7 @@ python3 scripts/render.py order-service.json order-service.html --icons icons/ -
 /plugin install arch-diagram@arch-diagram
 ```
 
-로컬 체크아웃에서: `/plugin marketplace add /path/to/arch-diagram` 후 동일하게 설치.
+로컬 체크아웃에서: `/plugin marketplace add /path/to/arch-diagram` 후 동일하게 설치. Claude Code는 설치 시점의 플러그인을 **버전별로 캐시**하므로, 체크아웃을 수정했다면 매니페스트의 `version`을 올린 뒤 `claude plugin marketplace update arch-diagram && claude plugin update arch-diagram@arch-diagram` 로 갱신하고 세션을 다시 시작하세요.
 
 **Codex**
 

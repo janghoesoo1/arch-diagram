@@ -12,6 +12,8 @@ docs/                    rendered example PNGs, ADRs
 
 The four manifests must carry the same name, description, version, author, repository, license and keywords; `scripts/verify_package.py` fails on drift. Bump `version` in all of them together.
 
+A locally installed copy is cached per version by Claude Code (`~/.claude/plugins/cache/arch-diagram/arch-diagram/<version>/`); after a bump run `claude plugin marketplace update arch-diagram && claude plugin update arch-diagram@arch-diagram` to pick it up.
+
 ## Gates
 
 ```bash

@@ -7,6 +7,8 @@ arch-diagram is MIT-licensed (`LICENSE`). It derives from two MIT-licensed proje
 - **stack-diagram** — Copyright caru-ini, MIT. https://github.com/caru-ini/stack-diagram — icon fetching chain, canvas template, vendor drawing rules, PNG/TSX export.
 - **diagram-design** — Copyright Cathryn Lavery, MIT. https://github.com/cathrynlavery/diagram-design — editorial rules, complexity budget, connector rules, accessibility contract, Korean font gate (via the fork https://github.com/janghoesoo1/diagram-design-korean-font).
 
+- **archify** — Copyright tt-a1i and contributors, Apache-2.0. https://github.com/tt-a1i/archify — design source for the typed JSON spec, the delivery contract (validate → deliver atomically with a receipt and machine-readable findings), the viewer's focus / reach / route / deep-link model, the architecture delta, and the repository-evidence rules. No archify code is included; arch-diagram re-implements these contracts in Python and a small inline script.
+
 ## Bundled fonts (SIL Open Font License 1.1)
 
 - **Geist** — Vercel. `skills/arch-diagram/assets/fonts/Geist.woff2`, license in `OFL-Geist.txt`.

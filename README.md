@@ -16,13 +16,42 @@
 
 > 커머스 서비스 AWS 구성도: CloudFront 뒤에 S3와 공용 서브넷의 ALB, 사설 서브넷에 Fargate·RDS·ElastiCache.
 
-`arch-diagram`은 두 플러그인의 장점을 하나로 합친 것입니다.
+`arch-diagram`은 세 플러그인의 장점을 하나로 합친 것입니다.
 
 | 가져온 것 | 출처 |
 |---|---|
 | 공식 로고 수집 체인(svgl → devicon → gilbarbara, AWS/GCP/Azure 공식 아이콘 패키지, Lucide 픽토그램), HTML 캔버스 + SVG 엣지 오버레이, 벤더별 작도 규칙(VPC/서브넷/리전), 라이트·다크 동시 렌더, PNG/TSX 내보내기 | [stack-diagram](https://github.com/caru-ini/stack-diagram) |
 | "삭제가 최고의 수정" 철학, 복잡도 예산(노드 ≤ 9, 엣지 ≤ 12, 강조색 1경로), 6가지 커넥터 규칙(직각만, 라벨 간격, 선 겹침 금지, 접점 분산, 비끝점 통과 금지, 텍스트 통과 금지), 접근성 계약, 한글 폰트 게이트 | [diagram-design](https://github.com/cathrynlavery/diagram-design) + [korean-font 포크](https://github.com/janghoesoo1/diagram-design-korean-font) |
-| **새로 추가:** 마크업만으로 위 규칙을 전부 검사하는 `check.py`, Pretendard 글리프 서브셋 임베딩(페이지당 ≈ 8 KB), 한글 폭 예산(음절당 1em)과 `wide` 노드, 한글 작명 규칙, `lang=ko` 자동 설정 | arch-diagram |
+| typed **JSON 소스 → 결정적 자동 배치**(좌표 손배치 없음, 수정 시 무관한 부분 유지), 기계가 읽는 검증 결과(rule id · target · fix), **인터랙티브 뷰어**(포커스 · 상류/하류 추적 · 경로 · 딥링크), 검사 통과본만 결과 파일을 교체하는 **원자적 전달 + 영수증**, 두 버전 사이의 **아키텍처 delta**, 노드별 저장소 근거(`sources`) | [archify](https://github.com/tt-a1i/archify) |
+| **새로 추가:** 마크업만으로 위 규칙을 전부 검사하는 `check.py`, Pretendard 글리프 서브셋 임베딩(페이지당 ≈ 8 KB), 한글 폭 예산(음절당 1em)과 자동 `wide` 노드, 한글 작명 규칙, `lang=ko` 자동 설정 — 전부 Python 표준 라이브러리로, Node 없이 | arch-diagram |
+
+## 한 줄 스펙에서 결과까지
+
+```jsonc
+// order-service.json — 좌표가 없다. 행/열·소속·연결만 적는다.
+{ "title": "주문 서비스 아키텍처", "description": "사용자가 … 연결된다.",
+  "groups": [ { "id": "vercel", "label": "Vercel", "kind": "ga", "icon": "vercel" } ],
+  "nodes":  [ { "id": "next", "name": "Next.js", "role": "프론트엔드 · SSR", "icon": "nextjs", "row": 0, "col": 1, "group": "vercel" }, … ],
+  "edges":  [ { "from": "user", "to": "next", "kind": "primary", "label": "HTTPS" }, … ] }
+```
+
+```bash
+python3 scripts/render.py order-service.json order-service.html --icons icons/ --kr-font auto --png
+# [PASS] spec+layout  [PASS] build  [PASS] check  [PASS] png  → order-service.html + .receipt.json + PNG 쌍
+```
+
+`render.py`는 배치 → 빌드 → 검사 → 렌더를 순서대로 돌리고, **모든 게이트를 통과했을 때만** 결과 파일을 교체합니다. 실패하면 이전 결과는 그대로, 후보는 `.rejected.html`로 남고, 각 finding에 `fix` 힌트가 붙어 나옵니다 — 고칠 곳은 HTML이 아니라 스펙입니다.
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/order-service-delta-dark.png">
+  <img src="docs/order-service-delta.png" alt="주문 서비스 아키텍처 delta: Kafka 추가(초록), Upstash 역할 변경(주황), GitHub Actions 삭제(점선 고스트)" width="100%">
+</picture>
+
+> `diff.py base.json head.json --annotate head.delta.json` → 추가·변경·삭제가 표시된 그림. 노드 id만 안정적으로 유지하면 됩니다.
+
+<img src="docs/viewer-focus.png" alt="뷰어: Hono API를 포커스하고 하류를 추적한 상태. 연결된 노드만 밝게, 카드에 상류/하류/그룹이 표시된다" width="100%">
+
+> 결과 HTML 안의 뷰어: 노드를 클릭하면 연결이 강조되고, `U`/`D`로 상류·하류, `R`로 두 노드 사이 경로, `#focus=hono&reach=downstream` 같은 딥링크로 같은 화면을 공유합니다. JS가 없어도(인쇄, PNG) 그림의 의미는 그대로입니다.
 
 ## 설치
 
@@ -63,7 +92,8 @@ droid plugin install arch-diagram@arch-diagram --scope user
 
 | 명령 | 역할 |
 |---|---|
-| `/arch-diagram:draw <설명> [--png] [--tsx] [--artifact]` | 내용 정리 → 아이콘 수집 → 배치 → 빌드 → 검사 → 렌더 → 전달 |
+| `/arch-diagram:draw <설명 \| --repo <path>> [--png] [--tsx] [--artifact]` | 내용 정리 → 아이콘 수집 → **스펙 작성** → `render.py`(배치·빌드·검사·렌더·원자적 전달) → 눈으로 확인 → 전달. `--repo`면 저장소 근거를 노드에 붙임 |
+| `/arch-diagram:diff <base.json> <head.json> [--render]` | 두 스펙의 아키텍처 delta — 추가·변경·삭제 목록, `--render`로 표시된 그림 |
 | `/arch-diagram:check <file.html>` | 가독성 게이트만 실행 |
 | `/arch-diagram:export <file.html> [--png\|--tsx]` | 라이트/다크 PNG 쌍 또는 React 컴포넌트 |
 | `/arch-diagram:doctor` | 환경 진단 |
@@ -78,7 +108,9 @@ droid plugin install arch-diagram@arch-diagram --scope user
 
 **로고는 진짜만.** 색을 바꾸거나 다시 그리지 않습니다. 흰 로고는 어두운 타일에, 개념은 Lucide 픽토그램으로, AWS/GCP/Azure는 각 벤더의 공식 아이콘과 작도 규칙으로. 토스·카카오·네이버 같은 국내 서비스 로고는 어떤 공개 소스에도 없으니 공식 에셋 URL을 지정하거나 역할 픽토그램을 씁니다.
 
-**결과물은 HTML 한 파일.** 폰트·아이콘이 전부 data URI로 들어 있어 어디서나 열립니다. PNG(라이트+다크)는 그 HTML을 헤드리스 Chromium으로 찍은 것이고, TSX는 같은 좌표의 React 컴포넌트입니다.
+**결과물은 HTML 한 파일.** 폰트·아이콘이 전부 data URI로 들어 있어 어디서나 열립니다. 안에 든 뷰어는 오프라인·자급자족이며(`check.py`가 네트워크 호출이 섞이면 거부), PNG(라이트+다크)는 그 HTML을 헤드리스 Chromium으로 찍은 것이고, TSX는 같은 좌표의 React 컴포넌트입니다.
+
+**소스는 스펙, 배치는 엔진.** 행·열·소속·연결만 적으면 `layout.py`가 geometry 규칙대로 좌표를 정합니다 — 같은 스펙은 항상 같은 HTML, 노드 하나를 옮기면 그에 딸린 것만 움직입니다. 저장소를 그릴 때는 `references/from-repo.md`대로 노드마다 `sources`(파일:줄)를 붙이고, 뷰어 카드에서 바로 볼 수 있습니다.
 
 ## 저장소 구조
 
@@ -86,10 +118,10 @@ droid plugin install arch-diagram@arch-diagram --scope user
 skills/arch-diagram/
   SKILL.md                 워크플로우·규칙 (< 40 KB)
   assets/template.html     캔버스 템플릿 — 마크업이 곧 포맷 문서
-  assets/examples/         빌드된 예제 (+ src/ 초안)
+  assets/examples/         빌드된 예제 (+ src/*.json 스펙)
   assets/fonts/ generic/   Geist·JetBrains Mono, 범용 픽토그램
-  references/              geometry · icons · korean · style · tsx · export · doctor
-  scripts/                 fetch_icons · build · check · render_png
+  references/              spec · geometry · icons · korean · viewer · from-repo · style · tsx · export · doctor
+  scripts/                 fetch_icons · layout · build · check · render · render_png · diff
 commands/                  Claude Code 슬래시 명령
 scripts/                   저장소 게이트 (test_check, verify_package)
 docs/                      예제 PNG, ADR
@@ -97,7 +129,7 @@ docs/                      예제 PNG, ADR
 
 ## 의도적으로 뺀 것
 
-diagram-design의 나머지 38개 다이어그램 타입, 브랜드 프로필 온보딩, Mermaid/draw.io 가져오기, 애니메이션, 그리고 stack-diagram의 공개 갤러리 공유. 이 플러그인은 아키텍처 다이어그램 하나를 잘 그리는 데 집중합니다 ([ADR 0001](docs/adr/0001-one-skill-from-two-lineages.md)).
+diagram-design의 나머지 38개 다이어그램 타입, 브랜드 프로필 온보딩, Mermaid/draw.io 가져오기, 애니메이션, stack-diagram의 공개 갤러리 공유, 그리고 archify의 Node 렌더러·9개 다른 다이어그램 타입·explainer·모션·공유 카드·브랜드 마크 카탈로그. 이 플러그인은 아키텍처 다이어그램 하나를 잘 그리는 데 집중합니다 ([ADR 0001](docs/adr/0001-one-skill-from-two-lineages.md), [ADR 0002](docs/adr/0002-spec-first-delivery-from-archify.md)).
 
 ## 라이선스
 

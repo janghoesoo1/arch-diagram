@@ -7,7 +7,8 @@ Reads the built (or draft) HTML and verifies, from the markup alone, the rules t
 diagram readable — before anyone has to look at a PNG:
 
   structure   canvas size == edge viewBox; nothing outside the canvas; no leftover
-              placeholders or %%tokens%%; icons are data URIs; no scripts or remote assets
+              placeholders or %%tokens%%; icons are data URIs; no remote assets; no script
+              but the template's self-contained viewer
   a11y        canvas has role="img" + aria-label; <title> set; edge overlay aria-hidden
   budget      <= 9 nodes (14 with --faithful), <= 12 edges, <= 4 groups, 1 focal tile
   nodes       no overlaps; names fit (Korean counted at 1em per syllable); row spacing
@@ -186,6 +187,9 @@ class Diagram(HTMLParser):
         self.title = ""
         self.styles: list[str] = []
         self.scripts = 0
+        self.viewer_scripts = 0
+        self.viewer_text: list[str] = []
+        self._in_viewer = False
         self.remote: list[str] = []
         self.img_srcs: list[str] = []
         self.kr_link = False
@@ -222,7 +226,11 @@ class Diagram(HTMLParser):
         elif tag == "style":
             self._in_style = True
         elif tag == "script":
-            self.scripts += 1
+            if "data-arch-diagram-viewer" in a and not a.get("src"):
+                self.viewer_scripts += 1
+                self._in_viewer = True
+            else:
+                self.scripts += 1
         elif tag == "link" and "fonts.googleapis.com" in a.get("href", ""):
             if "Noto+Sans+KR" in a.get("href", ""):
                 self.kr_link = True
@@ -297,6 +305,7 @@ class Diagram(HTMLParser):
             self.handle_endtag(tag)
 
     def handle_endtag(self, tag):
+        if tag == "script": self._in_viewer = False
         if tag == "title": self._in_title = False
         if tag == "style": self._in_style = False
         if tag == "defs": self._in_defs = False
@@ -320,6 +329,9 @@ class Diagram(HTMLParser):
     def handle_data(self, data):
         if self._in_style:
             self.styles.append(data)
+            return
+        if self._in_viewer:
+            self.viewer_text.append(data)
             return
         if self._in_title:
             self.title += data
@@ -353,13 +365,75 @@ def fmt(v):
 
 
 # ----------------------------------------------------------------------------- the checks
+FIXES = {
+    "unresolved-token": "run build.py with the icons dir that holds every %%ICON_<name>%% file",
+    "placeholder": "fill the template placeholders (title, kicker, lede, description, footer, icon sources)",
+    "script": "remove the script; keep only the template's data-arch-diagram-viewer block",
+    "remote-asset": "inline it as a data URI (build.py does this for icons and fonts)",
+    "icon-not-inlined": "run build.py over the draft",
+    "canvas-viewbox": "set svg.edges viewBox to \"0 0 <canvas width> <canvas height>\"",
+    "a11y-label": "write one sentence in aria-label saying what connects to what",
+    "a11y-role": "add role=\"img\" to the canvas div",
+    "korean-font-stack": "keep --font-kr in the font tokens (the template has it)",
+    "korean-webfont": "rebuild with build.py --kr-font auto, or keep the Noto Sans KR link",
+    "lang": "set <html lang=\"ko\"> (build.py switches en → ko automatically)",
+    "name-fit": "shorten the name or give the node class wide / xwide (spec: \"width\")",
+    "role-fit": "shorten the role line or widen the node",
+    "node-in-canvas": "enlarge the canvas or move the node inward (spec: lower col/row)",
+    "node-overlap": "move one node to a free cell (spec: unique row/col)",
+    "node-spacing": "keep same-row centres ≥ 140px apart",
+    "focal": "keep a single focal tile",
+    "node-in-group": "widen the group to 24px outside the node box, 60px above, 50px below",
+    "node-group-edge": "move the node fully inside or outside the group (spec: membership or cell)",
+    "group-overlap": "nest one group fully inside the other, or separate them",
+    "group-nesting": "inset the child ≥16px and ≥40px below the parent's top",
+    "edge-diagonal": "route with H/V segments only",
+    "edge-anchor": "end the line 2–12px off the tile side, tile top, or box bottom",
+    "edge-through-text": "connect box bottom → tile top (never from the tile bottom); or reroute",
+    "edge-through-node": "reroute around the tile, or move the node out of the corridor",
+    "edge-overlap": "offset one of the lines by ≥12px (spec: layout does this for request/return pairs)",
+    "edge-attach": "fan attach points ≥12px apart on that side",
+    "edge-crowding": "keep parallel lines ≥12px apart",
+    "edge-label-corner": "shorten the group label or move the edge's attach point",
+    "label-on-node": "move the label along its segment, or onto another segment",
+    "label-on-line": "place the label at y = lineY−8 (horizontal) or x = lineX+10 (vertical)",
+    "label-overlap": "slide one label along its segment, or shorten it",
+    "label-length": "keep edge labels to 1–2 short words; move detail into the role line",
+    "label-group-corner": "move the label off the group's label corner",
+    "legend-missing": "add a legend swatch for that edge kind",
+    "legend-extra": "remove the unused legend entry",
+    "legend": "add a legend strip under the canvas",
+    "budget-nodes": "merge or cut nodes, or split into overview + detail",
+    "budget-edges": "drop edges the layout already implies",
+    "budget-accent": "keep accent on one continuous primary path",
+    "budget-groups": "merge groups or split the diagram",
+    "budget-nesting": "flatten to one nesting level (cloud → VPC → subnet excepted)",
+    "grid": "snap positions to multiples of 4 (layout.py does)",
+    "dom-nesting": "make every node and group a direct child of the canvas",
+}
+
+
 class Report:
     def __init__(self):
         self.items: list[tuple[str, str, str]] = []
-    def fail(self, cid, msg): self.items.append(("FAIL", cid, msg))
-    def warn(self, cid, msg): self.items.append(("WARN", cid, msg))
-    def info(self, cid, msg): self.items.append(("INFO", cid, msg))
+        self.targets: dict[int, str] = {}
+    def _add(self, level, cid, msg, target):
+        self.items.append((level, cid, msg))
+        if target:
+            self.targets[len(self.items) - 1] = target
+    def fail(self, cid, msg, target=None): self._add("FAIL", cid, msg, target)
+    def warn(self, cid, msg, target=None): self._add("WARN", cid, msg, target)
+    def info(self, cid, msg, target=None): self._add("INFO", cid, msg, target)
     def count(self, level): return sum(1 for l, _, _ in self.items if l == level)
+    def records(self):
+        out = []
+        for i, (level, cid, msg) in enumerate(self.items):
+            rec = {"level": level, "id": cid, "message": msg}
+            target = self.targets.get(i) or (re.search(r'"([^"]+)"', msg).group(1) if re.search(r'"([^"]+)"', msg) else None)
+            if target: rec["target"] = target
+            if cid in FIXES: rec["fix"] = FIXES[cid]
+            out.append(rec)
+        return out
 
 
 def run(path: Path, faithful: bool = False) -> Report:
@@ -375,7 +449,14 @@ def run(path: Path, faithful: bool = False) -> Report:
     for ph in sorted(set(PLACEHOLDER_RE.findall(raw))):
         rep.fail("placeholder", f"[{ph}] placeholder still in the page")
     if d.scripts:
-        rep.fail("script", f"{d.scripts} <script> element(s): a diagram is static markup")
+        rep.fail("script", f"{d.scripts} <script> element(s): a diagram is static markup (only the template's data-arch-diagram-viewer script is allowed)")
+    if d.viewer_scripts > 1:
+        rep.fail("script", f"{d.viewer_scripts} viewer scripts — the template carries exactly one")
+    viewer_js = "".join(d.viewer_text)
+    for needle in ("fetch(", "XMLHttpRequest", "import(", "WebSocket", "sendBeacon", "eval("):
+        if needle in viewer_js:
+            rep.fail("script", f"viewer script contains {needle!r} — the viewer must stay offline and self-contained")
+            break
     for ref in d.remote:
         rep.fail("remote-asset", f"remote asset {ref} — everything but Google Fonts must be inlined")
     for src in d.img_srcs:
@@ -619,6 +700,7 @@ def run(path: Path, faithful: bool = False) -> Report:
                 rep.warn("edge-crowding", f"edges {p1 + 1} and {p2 + 1} run {fmt(same)}px apart for {fmt(hi - lo)}px — keep parallel lines ≥12px apart")
 
     # --- edge labels --------------------------------------------------------------------------
+    placed: list[tuple] = []
     for L in d.svg["labels"]:
         if L["x"] is None or L["y"] is None:
             rep.fail("label-pos", f"edge label \"{L['text']}\" needs x and y")
@@ -643,6 +725,10 @@ def run(path: Path, faithful: bool = False) -> Report:
         for g in groups:
             if rects_overlap(box, g["corner"]):
                 rep.warn("label-group-corner", f"edge label \"{L['text']}\" sits in the label corner of group \"{g['label']}\"")
+        for other_text, other_box in placed:
+            if rects_overlap(box, other_box, 2):
+                rep.fail("label-overlap", f"edge labels \"{L['text']}\" and \"{other_text}\" overlap")
+        placed.append((L["text"], box))
 
     # --- legend -------------------------------------------------------------------------------
     def kind(classes):
@@ -688,8 +774,7 @@ def main() -> int:
     print(f"check: {status} ({f} fail, {w} warn, {i} info) — {args.file.name}")
     if args.json:
         print(json.dumps({"status": status, "counts": {"fail": f, "warn": w, "info": i},
-                          "findings": [{"level": l, "id": c, "message": m} for l, c, m in rep.items]},
-                         ensure_ascii=False, indent=2))
+                          "findings": rep.records()}, ensure_ascii=False, indent=2))
     return 1 if status == "FAIL" else 0
 
 

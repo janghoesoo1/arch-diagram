@@ -1,0 +1,33 @@
+{
+  "title": "주문 서비스 아키텍처",
+  "kicker": "arch-diagram · 예제",
+  "lede": "사용자 요청은 Vercel 위의 Next.js와 Hono API를 지나 Neon·Upstash에 닿고, 결제는 외부 PG로 나간다. GitHub Actions가 배포한다.",
+  "description": "사용자가 HTTPS로 Vercel의 Next.js에 접속하고, Next.js는 같은 Vercel 배포의 Hono API를 RPC로 호출한다. Hono는 Neon PostgreSQL에 SQL을 보내고 Upstash Redis를 캐시로 쓰며, 결제 요청을 외부 결제 대행사에 보내 webhook으로 결과를 받는다. GitHub Actions가 Vercel에 배포한다.",
+  "footer": "arch-diagram 예제 · 주문 서비스",
+  "icon_sources": "icons: svgl / devicon / Lucide",
+  "theme": { "g1": "graphite" },
+  "groups": [
+    { "id": "vercel", "label": "Vercel", "kind": "ga", "icon": "vercel" },
+    { "id": "github", "label": "GitHub", "kind": "gb", "icon": "github" },
+    { "id": "store",  "label": "저장소", "kind": "gc", "icon": "database" }
+  ],
+  "nodes": [
+    { "id": "user",  "name": "사용자",         "role": "browser",          "icon": "user",          "row": 0, "col": 0 },
+    { "id": "next",  "name": "Next.js",        "role": "프론트엔드 · SSR",  "icon": "nextjs",        "row": 0, "col": 1, "group": "vercel" },
+    { "id": "hono",  "name": "Hono API",       "role": "백엔드 · RPC",     "icon": "hono",          "row": 0, "col": 2, "group": "vercel", "focal": true },
+    { "id": "pg",    "name": "결제 대행사",      "role": "PG · webhook",     "icon": "pg",            "row": 0, "col": 3 },
+    { "id": "gha",   "name": "GitHub Actions", "role": "CI · 배포",        "icon": "githubactions", "row": 1, "col": 0, "group": "github" },
+    { "id": "neon",  "name": "Neon",           "role": "PostgreSQL 16",    "icon": "neon",          "row": 1, "col": 2, "group": "store" },
+    { "id": "redis", "name": "Upstash",        "role": "Redis 캐시",       "icon": "upstash",       "row": 1, "col": 3, "group": "store" }
+  ],
+  "edges": [
+    { "from": "user", "to": "next",  "kind": "primary",  "label": "HTTPS" },
+    { "from": "next", "to": "hono",  "kind": "primary",  "label": "RPC" },
+    { "from": "hono", "to": "pg",    "kind": "primary",  "label": "결제 요청" },
+    { "from": "pg",   "to": "hono",  "kind": "async",    "label": "webhook" },
+    { "from": "hono", "to": "neon",  "kind": "internal", "label": "SQL" },
+    { "from": "hono", "to": "redis", "kind": "internal", "label": "cache" },
+    { "from": "gha",  "to": "next",  "kind": "async",    "label": "deploy" }
+  ],
+  "legend": { "async": "비동기 · 배포" }
+}

@@ -24,14 +24,17 @@ MAX_SKILL_BYTES = 40_000
 SHARED = ("name", "description", "version", "author", "homepage", "repository", "license", "keywords")
 MANIFESTS = (".claude-plugin/plugin.json", ".codex-plugin/plugin.json", ".factory-plugin/plugin.json")
 MARKETPLACES = (".claude-plugin/marketplace.json", ".factory-plugin/marketplace.json", ".agents/plugins/marketplace.json")
-TRIGGERS = ("architecture", "stack", "infra", "아키텍처", "구성도", "AWS", "Google Cloud", "Azure", "Korean", "PNG", "TSX")
+TRIGGERS = ("architecture", "stack", "infra", "아키텍처", "구성도", "AWS", "Google Cloud", "Azure", "Korean", "PNG", "TSX", "JSON spec", "interactive", "delta", "codebase")
 REQUIRED_FILES = (
     "SKILL.md", "LICENSE", "assets/template.html", "assets/fonts/Geist.woff2", "assets/fonts/JetBrainsMono.woff2",
     "assets/fonts/OFL-Geist.txt", "assets/fonts/OFL-JetBrainsMono.txt", "assets/generic/user.svg",
-    "assets/examples/order-service.html", "assets/examples/src/order-service.html",
+    "assets/examples/order-service.html", "assets/examples/rag-chatbot.html",
+    "assets/examples/src/order-service.json", "assets/examples/src/aws-commerce.json", "assets/examples/src/rag-chatbot.json",
     "scripts/fetch_icons.py", "scripts/build.py", "scripts/check.py", "scripts/render_png.py",
+    "scripts/layout.py", "scripts/render.py", "scripts/diff.py",
     "references/geometry.md", "references/icons.md", "references/korean.md", "references/style.md",
     "references/tsx.md", "references/export.md", "references/doctor.md",
+    "references/spec.md", "references/viewer.md", "references/from-repo.md",
 )
 
 errors: list[str] = []
@@ -112,18 +115,20 @@ for cmd in sorted((ROOT / "commands").glob("*.md")):
         if not (SKILL / "references" / ref).exists():
             err(f"{cmd.name}: references/{ref} does not exist")
 
-# the template keeps its placeholders (that is its job); the built example must not
-example = SKILL / "assets/examples/order-service.html"
-if example.exists():
+# the template keeps its placeholders (that is its job); the built examples must not
+for example in sorted((SKILL / "assets/examples").glob("*.html")):
     t = example.read_text(encoding="utf-8")
     if re.search(r"%%[A-Za-z0-9_-]+%%|\[(TITLE|KICKER|LEDE|DESC|FOOT-LEFT|ICON-SOURCES)\]", t):
-        err("built example still carries placeholders")
+        err(f"{example.name} still carries placeholders")
     if "font-family:\"Pretendard\"" not in t.replace(" ", ""):
-        err("built example should embed the Pretendard subset (build with --kr-font auto)")
+        err(f"{example.name} should embed the Pretendard subset (render with --kr-font auto)")
+    if "data-arch-diagram-viewer" not in t:
+        err(f"{example.name} was built from an old template (no viewer)")
 template = SKILL / "assets/template.html"
 if template.exists():
     t = template.read_text(encoding="utf-8")
-    for tok in ("%%FONT_DISPLAY%%", "%%FONT_JBM%%", "<!-- KR-FONT:", 'class="canvas" role="img"', 'class="edges"', "--font-kr"):
+    for tok in ("%%FONT_DISPLAY%%", "%%FONT_JBM%%", "<!-- KR-FONT:", 'class="canvas" role="img"', 'class="edges"', "--font-kr",
+                "data-arch-diagram-viewer", "data-viewer-toolbar", "data-viewer-passport", "[data-delta=\"added\"]"):
         if tok not in t:
             err(f"template.html lost {tok!r}")
 

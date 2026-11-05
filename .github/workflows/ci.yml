@@ -29,10 +29,13 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: check.py fixtures
         run: python scripts/test_check.py
+      - name: layout / render / diff tests
+        run: python scripts/test_layout.py
       - name: package / manifest sync
         run: python scripts/verify_package.py
-      - name: shipped example passes the gate
-        run: python skills/arch-diagram/scripts/check.py skills/arch-diagram/assets/examples/order-service.html --strict
+      - name: shipped examples pass the gate
+        run: |
+          for f in skills/arch-diagram/assets/examples/*.html; do python skills/arch-diagram/scripts/check.py "$f" --strict; done
       - name: template still builds
         run: |
           mkdir -p /tmp/icons

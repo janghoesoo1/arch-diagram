@@ -1,23 +1,24 @@
 ---
-description: Draw a readable architecture diagram (real logos, Korean-ready) from a one-line description of the stack
-argument-hint: "<describe the stack / 스택 설명> [--png] [--tsx] [--dark-only] [--artifact]"
+description: Draw a readable architecture diagram (real logos, Korean-ready, interactive) from a one-line description or a codebase
+argument-hint: "<describe the stack / 스택 설명 | --repo <path>> [--png] [--tsx] [--artifact] [--dark-only]"
 allowed-tools:
   - Read
   - Write
   - Edit
   - Bash
   - Glob
+  - Grep
 ---
 
-Draw an architecture diagram for `$ARGUMENTS` by following the `arch-diagram` skill (`skills/arch-diagram/SKILL.md`) end to end. Treat the skill and its references as the source of truth — do not reimplement the rules here.
+Draw an architecture diagram for `$ARGUMENTS` by following the `arch-diagram` skill (`skills/arch-diagram/SKILL.md`) end to end. The skill and its references are the source of truth — do not reimplement the rules here.
 
 ## Required behaviour
 
-1. **No description** → ask what the stack is (technologies, how they connect, where they run). Don't guess a system.
-2. **Settle content first** and state the plan in one short message (nodes, groups, primary flow, what the 9-node budget pushes out) unless the request already pins everything.
-3. Fetch icons with `scripts/fetch_icons.py`; on a `FAIL`, look for the official file (`name=URL`) or a Lucide pictogram per `references/icons.md`. Korean brands (토스, 카카오, 네이버…) are never in the public sources — do not fabricate a mark.
-4. Lay out per `references/geometry.md`, build with `scripts/build.py`; when any label is Korean add `--kr-font auto` (fall back to the Google Fonts link if `fonttools` is missing, and say so).
-5. `python3 scripts/check.py out.html` must report `PASS` before anything is delivered. Fix findings; do not suppress them.
-6. Render with `scripts/render_png.py` and **look at the PNG** (both themes) using the §7 checklist. If Playwright is missing, print the install command, deliver the HTML, and say the PNG was not verified.
-7. Deliver the HTML (default). `--png` also delivers the light/dark PNG pair; `--tsx` adds a component per `references/tsx.md`; `--artifact` publishes the HTML with the environment's artifact tool; `--dark-only` sets `data-theme="dark"` as authored and renders with `--single`.
-8. Report file paths, the icon sources used, and any assumption made about the system.
+1. **No description and no `--repo`** → ask what the stack is. Don't guess a system. With `--repo <path>`, follow `references/from-repo.md`: read manifests and deployment config, trace the requested path, record `sources` per node, and name the revision in the kicker.
+2. **Settle content first** and state the plan in one short message (nodes, groups, primary path, what the 9-node budget pushes out) unless the request already pins everything.
+3. Work in a folder per diagram: fetch icons with `scripts/fetch_icons.py` into `icons/`; on a `FAIL`, find the official file (`name=URL`) or use a Lucide pictogram per `references/icons.md`. Korean brands are never in the public sources — do not fabricate a mark.
+4. Write `<slug>.json` per `references/spec.md` (rows/columns, groups by membership, edges by endpoint). Never hand-place coordinates and never edit the built HTML.
+5. Run `python3 scripts/render.py <slug>.json <slug>.html --icons icons/ --kr-font auto --png` (drop `--kr-font auto` only if fonttools is missing, and say so; drop `--png` only if Playwright is missing, print the install command, and say the PNG was not verified). A non-zero exit is never success: read the findings and their `fix`, repair the **spec**, re-run. Two non-converging repairs mean the content is over budget — split it and say so.
+6. **Look at the PNG** (both themes) with the skill's §7 checklist before delivering.
+7. Deliver the HTML (default, interactive). `--png` also hands over the light/dark pair; `--tsx` adds a component per `references/tsx.md`; `--artifact` publishes the HTML with the environment's artifact tool; `--dark-only` renders with `data-theme="dark"` as authored.
+8. Reply briefly: a link to the HTML, the icon sources used, any assumption or omission, and the deep-link hint (`#focus=<id>`) when the user will explore it. Keep the receipt path for troubleshooting only.

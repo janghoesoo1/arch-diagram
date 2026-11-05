@@ -1,0 +1,9 @@
+{
+  "name": "arch-diagram",
+  "plugins": [
+    {
+      "name": "arch-diagram",
+      "source": "./"
+    }
+  ]
+}

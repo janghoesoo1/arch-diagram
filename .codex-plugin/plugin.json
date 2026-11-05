@@ -1,0 +1,48 @@
+{
+  "name": "arch-diagram",
+  "description": "Draw readable architecture diagrams (system / stack / infra / cloud / service topology — 아키텍처 · 시스템 구성도 · 기술 스택 · 인프라 구성도) as self-contained HTML (light + dark), PNG, React/TSX, or an artifact: real brand logos (svgl, devicon, official AWS / Google Cloud / Azure icons, Lucide pictograms), labeled group boxes, orthogonal arrows that never cross text, a legend strip, and first-class Korean typography (embedded Pretendard, Hangul width budgets).",
+  "version": "0.1.0",
+  "author": {
+    "name": "janghoesoo",
+    "url": "https://github.com/janghoesoo1"
+  },
+  "homepage": "https://github.com/janghoesoo1/arch-diagram",
+  "repository": "https://github.com/janghoesoo1/arch-diagram",
+  "license": "MIT",
+  "keywords": [
+    "diagrams",
+    "architecture",
+    "stack",
+    "infrastructure",
+    "cloud",
+    "aws",
+    "gcp",
+    "azure",
+    "logos",
+    "korean",
+    "한글",
+    "아키텍처",
+    "html",
+    "png",
+    "tsx"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Arch Diagram",
+    "shortDescription": "Readable architecture diagrams with real logos and Korean typography.",
+    "longDescription": "Draw readable architecture diagrams (system / stack / infra / cloud / service topology — 아키텍처 · 시스템 구성도 · 기술 스택 · 인프라 구성도) as self-contained HTML (light + dark), PNG, React/TSX, or an artifact: real brand logos (svgl, devicon, official AWS / Google Cloud / Azure icons, Lucide pictograms), labeled group boxes, orthogonal arrows that never cross text, a legend strip, and first-class Korean typography (embedded Pretendard, Hangul width budgets).",
+    "developerName": "janghoesoo",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/janghoesoo1/arch-diagram",
+    "defaultPrompt": [
+      "우리 서비스 아키텍처 다이어그램을 그려줘: Next.js on Vercel, Hono API, Neon Postgres, Upstash Redis, 결제는 토스페이먼츠.",
+      "Draw our AWS stack: CloudFront → ALB in a public subnet → Fargate and RDS in a private subnet.",
+      "이 다이어그램을 PNG(라이트/다크)로 내보내줘."
+    ],
+    "brandColor": "#2f6fe4"
+  }
+}

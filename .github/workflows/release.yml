@@ -1,0 +1,22 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # Claude apps expect arch-diagram/SKILL.md at the top of the zip
+      - name: Package skill
+        working-directory: skills
+        run: zip -r ../arch-diagram.zip arch-diagram -x "arch-diagram/assets/examples/src/*"
+      - name: Create release
+        run: gh release create "$GITHUB_REF_NAME" arch-diagram.zip --generate-notes
+        env:
+          GH_TOKEN: ${{ github.token }}

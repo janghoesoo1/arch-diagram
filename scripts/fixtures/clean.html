@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>주문 흐름</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --color-paper: oklch(98.5% 0.004 250);
+  --font-kr: "Pretendard", "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic";
+  --font-display: "Geist", var(--font-kr), sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, var(--font-kr), monospace;
+}
+.canvas { position: relative; width: 600px; height: 440px; background: var(--color-paper); }
+.group { position:absolute; }
+.node { position:absolute; width:132px; text-align:center; }
+.node.wide { width:172px; }
+.tile { width:60px; height:60px; margin:0 auto; }
+svg.edges { position:absolute; inset:0; width:100%; height:100%; }
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="head"><h1>주문 흐름</h1></header>
+  <figure class="figure">
+  <div class="scroller">
+  <div class="canvas" role="img" aria-label="사용자가 API를 거쳐 데이터베이스에 닿는다.">
+
+    <div class="group gc" style="left:372px; top:220px; width:180px; height:212px;">
+      <div class="g-label">저장소</div>
+    </div>
+
+    <svg class="edges" viewBox="0 0 600 440" aria-hidden="true">
+      <defs>
+        <marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+          <path d="M0 0 L10 5 L0 10 z" fill="context-stroke"/>
+        </marker>
+      </defs>
+      <path class="e" d="M144 150 H306" marker-end="url(#ar)"/>
+      <text class="el a" x="225" y="142" text-anchor="middle">HTTPS</text>
+      <path class="n" d="M354 226 V256 H462 V274" marker-end="url(#ar)"/>
+      <text class="el" x="344" y="245" text-anchor="end">SQL</text>
+    </svg>
+
+    <div class="node" style="left:44px;top:120px">
+      <div class="tile"><img src="data:image/svg+xml;base64,PHN2Zy8+" alt=""></div>
+      <div class="name"><span>사용자</span></div><div class="role"><span>browser</span></div>
+    </div>
+    <div class="node" style="left:276px;top:120px">
+      <div class="tile focal"><img src="data:image/svg+xml;base64,PHN2Zy8+" alt=""></div>
+      <div class="name"><span>API 서버</span></div><div class="role"><span>http · :8080</span></div>
+    </div>
+    <div class="node" style="left:396px;top:280px">
+      <div class="tile"><img src="data:image/svg+xml;base64,PHN2Zy8+" alt=""></div>
+      <div class="name"><span>데이터베이스</span></div><div class="role"><span>PostgreSQL</span></div>
+    </div>
+    <!-- END NODES -->
+
+  </div>
+  </div>
+  <figcaption class="legend">
+    <span><span class="sw"></span>주 요청 경로</span>
+    <span><span class="sw n"></span>내부 연결</span>
+  </figcaption>
+  </figure>
+</div>
+</body>
+</html>

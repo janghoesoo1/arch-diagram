@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+env:
+  PYTHONIOENCODING: utf-8
+  PYTHONUTF8: "1"
+
+jobs:
+  gates:
+    name: Gates (Python ${{ matrix.python-version }})
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.9", "3.12"]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: check.py fixtures
+        run: python scripts/test_check.py
+      - name: package / manifest sync
+        run: python scripts/verify_package.py
+      - name: shipped example passes the gate
+        run: python skills/arch-diagram/scripts/check.py skills/arch-diagram/assets/examples/order-service.html --strict
+      - name: template still builds
+        run: |
+          mkdir -p /tmp/icons
+          for n in vendor tool1 tool2 client app api; do cp skills/arch-diagram/assets/generic/server.svg /tmp/icons/$n.svg; done
+          python skills/arch-diagram/scripts/build.py skills/arch-diagram/assets/template.html /tmp/icons /tmp/template-built.html --kr-font none

@@ -9,3 +9,7 @@ venv/
 icons/
 icons-*/
 *.zip
+# render.py side files never belong in the repo
+*.receipt.json
+*.rejected.html
+*.tmp

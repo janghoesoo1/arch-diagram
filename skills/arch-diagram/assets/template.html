@@ -204,6 +204,52 @@ path.aws { stroke: var(--color-ink); stroke-width:1.6; fill:none; } /* inside an
 .legend .sw.box.gc { border-color: var(--color-g3); background: var(--color-g3-tint); }
 .legend .sw.box.boundary { border-style: dashed; border-color: var(--color-ink-2); background: none; }
 
+/* DELTA (diff.py --annotate): what changed since the base spec ------------------------------ */
+.node[data-delta="added"] .tile { box-shadow: 0 0 0 2px oklch(62% 0.17 150), 0 0 0 5px oklch(62% 0.17 150 / .18); }
+.node[data-delta="changed"] .tile { box-shadow: 0 0 0 2px oklch(72% 0.17 75), 0 0 0 5px oklch(72% 0.17 75 / .18); }
+.node[data-delta="removed"] { opacity: .45; }
+.node[data-delta="removed"] .tile { border-style: dashed; }
+.node[data-delta="removed"] .name { text-decoration: line-through; }
+.group[data-delta="added"] { outline: 2px solid oklch(62% 0.17 150 / .6); outline-offset: 3px; }
+.group[data-delta="changed"] { outline: 2px solid oklch(72% 0.17 75 / .6); outline-offset: 3px; }
+path.d-added { stroke: oklch(55% 0.17 150); }
+path.d-changed { stroke: oklch(62% 0.17 75); }
+path.d-removed { stroke: oklch(55% 0.19 25); stroke-dasharray: 2 4; opacity: .6; }
+.legend .sw.box.delta-added { border-color: oklch(62% 0.17 150); background: oklch(62% 0.17 150 / .15); }
+.legend .sw.box.delta-changed { border-color: oklch(72% 0.17 75); background: oklch(72% 0.17 75 / .15); }
+.legend .sw.box.delta-removed { border-style: dashed; border-color: oklch(55% 0.19 25); background: none; }
+
+/* VIEWER (progressive: everything below is inert without the script) ------------------------- */
+.canvas.has-focus .node:not(.is-on) { opacity: .28; }
+.canvas.has-focus .group { opacity: .6; }
+.canvas.has-focus svg.edges path:not(.is-on) { opacity: .15; }
+.canvas.has-focus svg.edges text:not(.is-on) { opacity: .15; }
+.canvas.has-focus .node.is-focus .tile { border-color: var(--color-accent); box-shadow: 0 0 0 3px var(--color-accent-tint); }
+.canvas.has-focus svg.edges path.is-on { stroke-width: 2; }
+.node[data-id] { cursor: pointer; }
+.passport { position: fixed; right: 16px; bottom: 16px; width: 280px; max-width: calc(100vw - 32px); z-index: 20;
+  background: var(--color-paper-2); border: 1px solid var(--color-rule-2); border-radius: var(--radius-card);
+  padding: 12px 14px; font-size: 12px; line-height: 1.55; color: var(--color-ink); box-shadow: 0 8px 24px oklch(24% 0.02 258 / .12); }
+.passport[hidden] { display: none; }
+.passport h3 { font-family: var(--font-display); font-size: 13px; font-weight: 600; margin: 0 0 2px; }
+.passport .role { font-family: var(--font-mono); font-size: 10px; color: var(--color-muted); }
+.passport dl { margin: 8px 0 0; display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; }
+.passport dt { font-family: var(--font-mono); font-size: 10px; color: var(--color-muted); letter-spacing: .04em; }
+.passport dd { margin: 0; }
+.passport dd button { font: inherit; color: inherit; background: none; border: none; padding: 0; cursor: pointer; text-decoration: underline; text-decoration-color: var(--color-rule-2); text-underline-offset: 2px; }
+.passport dd button:hover { color: var(--color-accent); }
+.passport .sources { font-family: var(--font-mono); font-size: 10px; color: var(--color-neutral); word-break: break-all; }
+.passport .actions { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+.passport .actions button, .toolbar button { font-family: var(--font-mono); font-size: 10px; letter-spacing: .04em; color: var(--color-ink-2);
+  background: var(--color-paper); border: 1px solid var(--color-rule-2); border-radius: 6px; padding: 4px 8px; cursor: pointer; }
+.passport .actions button[aria-pressed="true"], .toolbar button[aria-pressed="true"] { border-color: var(--color-accent); color: var(--color-accent); }
+.passport .close { position: absolute; top: 8px; right: 10px; background: none; border: none; font-size: 14px; color: var(--color-muted); cursor: pointer; }
+.toolbar { display: flex; gap: 8px; align-items: center; margin-top: var(--space-md); flex-wrap: wrap; font-family: var(--font-mono); font-size: 10px; color: var(--color-muted); }
+.toolbar[hidden] { display: none; }
+.toolbar input { font: inherit; color: var(--color-ink); background: var(--color-paper); border: 1px solid var(--color-rule-2); border-radius: 6px; padding: 4px 8px; width: 160px; }
+.toolbar .hint { margin-left: auto; }
+@media print { .passport, .toolbar { display: none !important; } .canvas.has-focus .node, .canvas.has-focus svg.edges path, .canvas.has-focus svg.edges text { opacity: 1 !important; } }
+
 .foot { margin-top: var(--space-xl); padding-top: var(--space-md); border-top: 1px solid var(--color-rule-2);
   display:flex; justify-content:space-between; gap: var(--space-md); flex-wrap:wrap;
   font-family: var(--font-mono); font-size:10px; color: var(--color-muted); }
@@ -298,11 +344,239 @@ path.aws { stroke: var(--color-ink); stroke-width:1.6; fill:none; } /* inside an
   </figcaption>
   </figure>
 
+  <!-- viewer chrome: hidden until the script runs; outside .figure so PNG captures never include it -->
+  <div class="toolbar" data-viewer-toolbar hidden>
+    <input type="search" data-viewer-find placeholder="노드 찾기 ( / )" aria-label="노드 찾기">
+    <button type="button" data-viewer-theme aria-pressed="false">다크 (T)</button>
+    <button type="button" data-viewer-clear>초기화 (Esc)</button>
+    <span class="hint" data-viewer-hint>노드를 클릭하면 연결이 강조됩니다 · ? 도움말</span>
+  </div>
+  <aside class="passport" data-viewer-passport hidden aria-live="polite"></aside>
+
   <div class="foot">
     <span>[FOOT-LEFT]</span>
     <span>[ICON-SOURCES] · made with <a href="https://github.com/janghoesoo1/arch-diagram" target="_blank" rel="noopener">arch-diagram</a></span>
   </div>
 
 </div>
+
+<!-- Viewer runtime: optional, offline, self-contained. The diagram keeps its complete meaning without
+     it (print, reduced capability, PNG). It reads the authored graph from the markup: every .node[data-id]
+     and every path[data-from][data-to]. Deep links: #focus=<id>[&reach=upstream|downstream], #route=<a>~<b>.
+     Keys: click/Enter focus · U/D reach · / find · T theme · Esc clear · ? help. check.py allows exactly
+     this one script and rejects any network call inside it. -->
+<script data-arch-diagram-viewer>
+(function () {
+  "use strict";
+  var canvas = document.querySelector(".canvas");
+  if (!canvas) return;
+  var ko = (document.documentElement.lang || "").toLowerCase().indexOf("ko") === 0;
+  var T = ko ? { up: "상류", down: "하류", none: "없음", group: "그룹", sources: "근거", note: "메모", copy: "링크 복사", copied: "복사됨",
+                 reachUp: "상류 추적", reachDown: "하류 추적", route: "경로", clear: "초기화 (Esc)", theme: "다크 (T)", light: "라이트 (T)",
+                 help: "클릭/Enter: 포커스 · U/D: 상류/하류 추적 · R: 두 노드 경로 · /: 찾기 · T: 테마 · Esc: 초기화",
+                 findPh: "노드 찾기 ( / )", routeAsk: "경로의 끝 노드를 클릭하세요", noRoute: "작성된 방향 경로가 없습니다" }
+            : { up: "upstream", down: "downstream", none: "none", group: "group", sources: "sources", note: "note", copy: "copy link", copied: "copied",
+                 reachUp: "trace upstream", reachDown: "trace downstream", route: "route", clear: "clear (Esc)", theme: "dark (T)", light: "light (T)",
+                 help: "click/Enter: focus · U/D: reach up/down · R: route between two nodes · /: find · T: theme · Esc: clear",
+                 findPh: "find node ( / )", routeAsk: "click the route's end node", noRoute: "no authored directed route" };
+  var nodes = {}, edges = [];
+  Array.prototype.forEach.call(canvas.querySelectorAll(".node[data-id]"), function (el) {
+    nodes[el.dataset.id] = { el: el, id: el.dataset.id, name: (el.querySelector(".name") || {}).textContent || el.dataset.id,
+      role: (el.querySelector(".role") || {}).textContent || "", group: el.dataset.group || "",
+      sources: el.dataset.sources || "", note: el.dataset.note || "", out: [], inn: [] };
+  });
+  Array.prototype.forEach.call(canvas.querySelectorAll("svg.edges path[data-from][data-to]"), function (p) {
+    var e = { el: p, from: p.dataset.from, to: p.dataset.to, kind: p.dataset.kind || "", label: null };
+    var t = p.nextElementSibling;
+    if (t && t.tagName.toLowerCase() === "text") e.label = t;
+    if (nodes[e.from] && nodes[e.to]) { edges.push(e); nodes[e.from].out.push(e); nodes[e.to].inn.push(e); }
+  });
+  if (!edges.length && !Object.keys(nodes).length) return;
+  var groupLabel = {};
+  Array.prototype.forEach.call(canvas.querySelectorAll(".group[data-id]"), function (g) {
+    groupLabel[g.dataset.id] = (g.querySelector(".g-label") || {}).textContent || g.dataset.id;
+  });
+  var toolbar = document.querySelector("[data-viewer-toolbar]"), passport = document.querySelector("[data-viewer-passport]");
+  var find = toolbar && toolbar.querySelector("[data-viewer-find]"), themeBtn = toolbar && toolbar.querySelector("[data-viewer-theme]");
+  var state = { focus: null, reach: null, route: null, routeStart: null };
+
+  function clearClasses() {
+    canvas.classList.remove("has-focus");
+    Object.keys(nodes).forEach(function (k) { nodes[k].el.classList.remove("is-on", "is-focus"); });
+    edges.forEach(function (e) { e.el.classList.remove("is-on"); if (e.label) e.label.classList.remove("is-on"); });
+  }
+  function on(id) { if (nodes[id]) nodes[id].el.classList.add("is-on"); }
+  function onEdge(e) { e.el.classList.add("is-on"); if (e.label) e.label.classList.add("is-on"); }
+  function reach(id, dir) {
+    var seen = {}, stack = [id], result = { nodes: [], edges: [] };
+    while (stack.length) {
+      var cur = stack.pop(); if (seen[cur]) continue; seen[cur] = true; result.nodes.push(cur);
+      (dir === "upstream" ? nodes[cur].inn : nodes[cur].out).forEach(function (e) {
+        result.edges.push(e); stack.push(dir === "upstream" ? e.from : e.to);
+      });
+    }
+    return result;
+  }
+  function route(a, b) {
+    var prev = {}, queue = [a], seen = {}; seen[a] = true;
+    while (queue.length) {
+      var cur = queue.shift(); if (cur === b) break;
+      nodes[cur].out.forEach(function (e) { if (!seen[e.to]) { seen[e.to] = true; prev[e.to] = e; queue.push(e.to); } });
+    }
+    if (!seen[b]) return null;
+    var path = [], cur = b;
+    while (cur !== a) { path.unshift(prev[cur]); cur = prev[cur].from; }
+    return path;
+  }
+  function apply() {
+    clearClasses();
+    if (passport) passport.hidden = true;
+    if (state.route) {
+      var r = state.route;
+      canvas.classList.add("has-focus");
+      r.forEach(function (e) { onEdge(e); on(e.from); on(e.to); });
+      nodes[r[0].from].el.classList.add("is-focus");
+      showCard(nodes[r[0].from], r);
+    } else if (state.focus && nodes[state.focus]) {
+      var n = nodes[state.focus];
+      canvas.classList.add("has-focus");
+      n.el.classList.add("is-on", "is-focus");
+      if (state.reach) {
+        var rr = reach(n.id, state.reach);
+        rr.nodes.forEach(on); rr.edges.forEach(onEdge);
+      } else {
+        n.out.concat(n.inn).forEach(function (e) { onEdge(e); on(e.from); on(e.to); });
+      }
+      showCard(n, null);
+    }
+    writeHash();
+  }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function list(items, key) {
+    if (!items.length) return "<dd>" + T.none + "</dd>";
+    return "<dd>" + items.map(function (e) {
+      var id = e[key]; return '<button type="button" data-go="' + esc(id) + '">' + esc(nodes[id].name) + "</button>";
+    }).join(", ") + "</dd>";
+  }
+  function showCard(n, routePath) {
+    if (!passport) return;
+    var h = '<button type="button" class="close" aria-label="close">×</button><h3>' + esc(n.name) + "</h3>";
+    if (n.role) h += '<div class="role">' + esc(n.role) + "</div>";
+    h += "<dl>";
+    if (routePath) {
+      h += "<dt>" + T.route + "</dt><dd>" + routePath.map(function (e, i) { return (i === 0 ? esc(nodes[e.from].name) + " → " : "") + esc(nodes[e.to].name); }).join(" → ") + "</dd>";
+    } else {
+      h += "<dt>" + T.up + "</dt>" + list(n.inn, "from") + "<dt>" + T.down + "</dt>" + list(n.out, "to");
+    }
+    if (n.group) h += "<dt>" + T.group + "</dt><dd>" + esc(groupLabel[n.group] || n.group) + "</dd>";
+    if (n.note) h += "<dt>" + T.note + "</dt><dd>" + esc(n.note) + "</dd>";
+    if (n.sources) h += "<dt>" + T.sources + '</dt><dd class="sources">' + esc(n.sources) + "</dd>";
+    h += "</dl>";
+    if (!routePath) {
+      h += '<div class="actions"><button type="button" data-reach="upstream" aria-pressed="' + (state.reach === "upstream") + '">' + T.reachUp + "</button>" +
+           '<button type="button" data-reach="downstream" aria-pressed="' + (state.reach === "downstream") + '">' + T.reachDown + "</button>" +
+           '<button type="button" data-copy>' + T.copy + "</button></div>";
+    } else {
+      h += '<div class="actions"><button type="button" data-copy>' + T.copy + "</button></div>";
+    }
+    passport.innerHTML = h;
+    passport.hidden = false;
+  }
+  function writeHash() {
+    var h = "";
+    if (state.route) h = "#route=" + encodeURIComponent(state.route[0].from) + "~" + encodeURIComponent(state.route[state.route.length - 1].to);
+    else if (state.focus) h = "#focus=" + encodeURIComponent(state.focus) + (state.reach ? "&reach=" + state.reach : "");
+    if (history.replaceState) history.replaceState(null, "", location.pathname + location.search + h);
+  }
+  function readHash() {
+    var h = location.hash.replace(/^#/, ""), params = {};
+    h.split("&").forEach(function (kv) { var i = kv.indexOf("="); if (i > 0) params[kv.slice(0, i)] = decodeURIComponent(kv.slice(i + 1)); });
+    state.focus = state.reach = state.route = null;
+    if (params.route && params.route.indexOf("~") > 0) {
+      var ab = params.route.split("~");
+      if (nodes[ab[0]] && nodes[ab[1]]) { var r = route(ab[0], ab[1]); if (r && r.length) state.route = r; }
+    } else if (params.focus && nodes[params.focus]) {
+      state.focus = params.focus;
+      if (params.reach === "upstream" || params.reach === "downstream") state.reach = params.reach;
+    }
+    apply();
+  }
+  function focusNode(id) {
+    if (state.routeStart && state.routeStart !== id) {
+      var r = route(state.routeStart, id);
+      state.routeStart = null;
+      if (r && r.length) { state.route = r; state.focus = null; apply(); return; }
+      setHint(T.noRoute); 
+    }
+    state.route = null; state.focus = id; apply();
+  }
+  function setHint(text) { var el = toolbar && toolbar.querySelector("[data-viewer-hint]"); if (el) el.textContent = text; }
+  function setTheme(dark) {
+    if (dark) document.documentElement.setAttribute("data-theme", "dark"); else document.documentElement.removeAttribute("data-theme");
+    if (themeBtn) { themeBtn.setAttribute("aria-pressed", String(dark)); themeBtn.textContent = dark ? T.light : T.theme; }
+    try { localStorage.setItem("arch-diagram-theme", dark ? "dark" : "light"); } catch (e) {}
+  }
+
+  Object.keys(nodes).forEach(function (k) {
+    var el = nodes[k].el;
+    el.setAttribute("tabindex", "0"); el.setAttribute("role", "button");
+    el.addEventListener("click", function (ev) { ev.stopPropagation(); focusNode(k); });
+    el.addEventListener("keydown", function (ev) { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); focusNode(k); } });
+  });
+  if (passport) passport.addEventListener("click", function (ev) {
+    var b = ev.target.closest("button"); if (!b) return;
+    ev.stopPropagation();
+    if (b.classList.contains("close")) { state.focus = state.route = state.reach = null; apply(); }
+    else if (b.dataset.go) focusNode(b.dataset.go);
+    else if (b.dataset.reach) { state.reach = state.reach === b.dataset.reach ? null : b.dataset.reach; apply(); }
+    else if (b.hasAttribute("data-copy")) {
+      var url = location.href;
+      var done = function () { b.textContent = T.copied; setTimeout(function () { b.textContent = T.copy; }, 1200); };
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(done, done); else done();
+    }
+  });
+  document.addEventListener("click", function (ev) {
+    if (passport && !passport.hidden && !passport.contains(ev.target) && !ev.target.closest(".node") && !ev.target.closest(".toolbar")) {
+      state.focus = state.route = state.reach = null; apply();
+    }
+  });
+  document.addEventListener("keydown", function (ev) {
+    if (ev.target && (ev.target.tagName === "INPUT" || ev.target.tagName === "TEXTAREA")) {
+      if (ev.key === "Escape") { ev.target.blur(); state.focus = state.route = state.reach = null; apply(); }
+      return;
+    }
+    if (ev.key === "Escape") { state.focus = state.route = state.reach = state.routeStart = null; apply(); setHint(T.help); }
+    else if (ev.key === "/" && find) { ev.preventDefault(); find.focus(); find.select(); }
+    else if (ev.key === "t" || ev.key === "T") setTheme(!document.documentElement.hasAttribute("data-theme"));
+    else if ((ev.key === "u" || ev.key === "U") && state.focus) { state.reach = state.reach === "upstream" ? null : "upstream"; apply(); }
+    else if ((ev.key === "d" || ev.key === "D") && state.focus) { state.reach = state.reach === "downstream" ? null : "downstream"; apply(); }
+    else if ((ev.key === "r" || ev.key === "R") && state.focus) { state.routeStart = state.focus; setHint(T.routeAsk); }
+    else if (ev.key === "?") setHint(T.help);
+  });
+  if (find) {
+    find.placeholder = T.findPh;
+    find.addEventListener("keydown", function (ev) {
+      if (ev.key !== "Enter") return;
+      var q = find.value.trim().toLowerCase(); if (!q) return;
+      var hit = Object.keys(nodes).filter(function (k) { return k.toLowerCase() === q || nodes[k].name.toLowerCase().indexOf(q) >= 0; })[0];
+      if (hit) { focusNode(hit); nodes[hit].el.scrollIntoView({ block: "nearest", inline: "nearest" }); }
+    });
+  }
+  if (toolbar) {
+    toolbar.hidden = false;
+    toolbar.querySelector("[data-viewer-clear]").textContent = T.clear;
+    toolbar.querySelector("[data-viewer-clear]").addEventListener("click", function () { state.focus = state.route = state.reach = null; apply(); });
+    if (themeBtn) themeBtn.addEventListener("click", function () { setTheme(!document.documentElement.hasAttribute("data-theme")); });
+    setHint(T.help);
+  }
+  try {
+    var saved = localStorage.getItem("arch-diagram-theme");
+    if (saved === "dark" && !document.documentElement.hasAttribute("data-theme")) setTheme(true);
+    else if (themeBtn) { themeBtn.textContent = document.documentElement.hasAttribute("data-theme") ? T.light : T.theme; themeBtn.setAttribute("aria-pressed", String(document.documentElement.hasAttribute("data-theme"))); }
+  } catch (e) {}
+  window.addEventListener("hashchange", readHash);
+  readHash();
+})();
+</script>
 </body>
 </html>

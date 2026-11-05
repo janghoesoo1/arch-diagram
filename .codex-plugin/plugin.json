@@ -1,7 +1,7 @@
 {
   "name": "arch-diagram",
-  "description": "Draw readable architecture diagrams (system / stack / infra / cloud / service topology — 아키텍처 · 시스템 구성도 · 기술 스택 · 인프라 구성도) as self-contained HTML (light + dark), PNG, React/TSX, or an artifact: real brand logos (svgl, devicon, official AWS / Google Cloud / Azure icons, Lucide pictograms), labeled group boxes, orthogonal arrows that never cross text, a legend strip, and first-class Korean typography (embedded Pretendard, Hangul width budgets).",
-  "version": "0.1.0",
+  "description": "Draw readable architecture diagrams (system / stack / infra / cloud / service topology — 아키텍처 · 시스템 구성도 · 기술 스택 · 인프라 구성도) from a typed JSON spec as self-contained interactive HTML (light + dark, focus / upstream-downstream / route deep links), PNG, React/TSX, or an artifact: real brand logos (svgl, devicon, official AWS / Google Cloud / Azure icons, Lucide pictograms), labeled group boxes, deterministic auto-layout with orthogonal arrows that never cross text, a machine-checked readability gate with fix hints, atomic delivery with a receipt, architecture delta between two versions, repository evidence per node, and first-class Korean typography (embedded Pretendard, Hangul width budgets).",
+  "version": "0.2.0",
   "author": {
     "name": "janghoesoo",
     "url": "https://github.com/janghoesoo1"
@@ -24,13 +24,16 @@
     "아키텍처",
     "html",
     "png",
-    "tsx"
+    "tsx",
+    "interactive",
+    "delta",
+    "json"
   ],
   "skills": "./skills/",
   "interface": {
     "displayName": "Arch Diagram",
-    "shortDescription": "Readable architecture diagrams with real logos and Korean typography.",
-    "longDescription": "Draw readable architecture diagrams (system / stack / infra / cloud / service topology — 아키텍처 · 시스템 구성도 · 기술 스택 · 인프라 구성도) as self-contained HTML (light + dark), PNG, React/TSX, or an artifact: real brand logos (svgl, devicon, official AWS / Google Cloud / Azure icons, Lucide pictograms), labeled group boxes, orthogonal arrows that never cross text, a legend strip, and first-class Korean typography (embedded Pretendard, Hangul width budgets).",
+    "shortDescription": "Readable, interactive architecture diagrams from a JSON spec — real logos, Korean typography, delta.",
+    "longDescription": "Draw readable architecture diagrams (system / stack / infra / cloud / service topology — 아키텍처 · 시스템 구성도 · 기술 스택 · 인프라 구성도) from a typed JSON spec as self-contained interactive HTML (light + dark, focus / upstream-downstream / route deep links), PNG, React/TSX, or an artifact: real brand logos (svgl, devicon, official AWS / Google Cloud / Azure icons, Lucide pictograms), labeled group boxes, deterministic auto-layout with orthogonal arrows that never cross text, a machine-checked readability gate with fix hints, atomic delivery with a receipt, architecture delta between two versions, repository evidence per node, and first-class Korean typography (embedded Pretendard, Hangul width budgets).",
     "developerName": "janghoesoo",
     "category": "Productivity",
     "capabilities": [
@@ -41,7 +44,8 @@
     "defaultPrompt": [
       "우리 서비스 아키텍처 다이어그램을 그려줘: Next.js on Vercel, Hono API, Neon Postgres, Upstash Redis, 결제는 토스페이먼츠.",
       "Draw our AWS stack: CloudFront → ALB in a public subnet → Fargate and RDS in a private subnet.",
-      "이 다이어그램을 PNG(라이트/다크)로 내보내줘."
+      "이 다이어그램을 PNG(라이트/다크)로 내보내줘.",
+      "이 저장소를 분석해서 런타임 아키텍처 다이어그램을 그려줘 (--repo .)."
     ],
     "brandColor": "#2f6fe4"
   }

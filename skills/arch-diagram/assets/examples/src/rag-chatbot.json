@@ -1,0 +1,31 @@
+{
+  "title": "문서 챗봇 RAG 아키텍처",
+  "kicker": "arch-diagram · 예제",
+  "lede": "사용자의 질문은 Vercel의 Next.js를 거쳐 FastAPI로 들어온다. FastAPI는 Supabase pgvector에서 관련 문서를 찾아 Claude에 프롬프트를 보내고, Inngest가 매일 밤 Notion 문서를 수집해 임베딩을 갱신한다.",
+  "description": "사용자가 HTTPS로 Vercel의 Next.js에 질문하면 Next.js는 FastAPI에 전달한다. FastAPI는 Supabase pgvector로 벡터 검색을 하고 Claude에 프롬프트를 보내 답을 받는다. Inngest가 매일 Notion 문서를 수집해 임베딩을 Supabase에 저장한다.",
+  "footer": "arch-diagram 예제 · 문서 챗봇",
+  "icon_sources": "icons: svgl",
+  "theme": { "g1": "graphite" },
+  "groups": [
+    { "id": "vercel", "label": "Vercel", "kind": "ga", "icon": "vercel" },
+    { "id": "sync",   "label": "동기화", "kind": "gb" }
+  ],
+  "nodes": [
+    { "id": "user",     "name": "사용자",   "role": "browser",         "icon": "user",     "row": 0, "col": 0 },
+    { "id": "next",     "name": "Next.js",  "role": "챗 UI · SSR",      "icon": "nextjs",   "row": 0, "col": 1, "group": "vercel" },
+    { "id": "api",      "name": "FastAPI",  "role": "RAG 오케스트레이터", "icon": "fastapi",  "row": 0, "col": 2, "focal": true },
+    { "id": "claude",   "name": "Claude",   "role": "LLM · API",       "icon": "claude",   "row": 0, "col": 3 },
+    { "id": "inngest",  "name": "Inngest",  "role": "배치 · cron",      "icon": "inngest",  "row": 1, "col": 1, "group": "sync" },
+    { "id": "supabase", "name": "Supabase", "role": "pgvector",        "icon": "supabase", "row": 1, "col": 2, "group": "sync" },
+    { "id": "notion",   "name": "Notion",   "role": "사내 문서",        "icon": "notion",   "row": 1, "col": 3, "tile": "dark" }
+  ],
+  "edges": [
+    { "from": "user",    "to": "next",     "kind": "primary",  "label": "HTTPS" },
+    { "from": "next",    "to": "api",      "kind": "primary",  "label": "질문" },
+    { "from": "api",     "to": "claude",   "kind": "primary",  "label": "프롬프트" },
+    { "from": "api",     "to": "supabase", "kind": "internal", "label": "벡터 검색" },
+    { "from": "notion",  "to": "inngest",  "kind": "async",    "label": "매일 수집" },
+    { "from": "inngest", "to": "supabase", "kind": "internal", "label": "임베딩" }
+  ],
+  "legend": { "async": "배치 · 비동기" }
+}

@@ -1,0 +1,31 @@
+{
+  "title": "커머스 서비스 AWS 구성도",
+  "kicker": "arch-diagram · 예제 · AWS",
+  "lede": "사용자는 CloudFront로 들어온다. 정적 파일은 S3가, API는 공용 서브넷의 ALB를 거쳐 사설 서브넷의 Fargate가 처리하고, 데이터는 RDS와 ElastiCache에 둔다.",
+  "description": "사용자가 HTTPS로 Amazon CloudFront에 접속한다. CloudFront는 정적 파일을 Amazon S3에서 서빙하고 API 경로를 VPC 공용 서브넷의 Elastic Load Balancing으로 보낸다. ALB는 사설 서브넷의 AWS Fargate로 전달하고, Fargate는 Amazon RDS에 SQL을 보내며 Amazon ElastiCache를 캐시로 쓴다.",
+  "footer": "arch-diagram 예제 · AWS",
+  "icon_sources": "icons: AWS Architecture Icons",
+  "groups": [
+    { "id": "aws",     "label": "AWS Cloud",  "kind": "aws",         "icon": "aws" },
+    { "id": "vpc",     "label": "VPC",        "kind": "aws vpc",     "icon": "vpc", "parent": "aws" },
+    { "id": "public",  "label": "공용 서브넷", "kind": "aws public",  "parent": "vpc" },
+    { "id": "private", "label": "사설 서브넷", "kind": "aws private", "parent": "vpc" }
+  ],
+  "nodes": [
+    { "id": "user",  "name": "사용자",                 "role": "browser",      "icon": "user",        "tile": "bare res", "row": 0, "col": 0 },
+    { "id": "cf",    "name": "Amazon CloudFront",      "role": "CDN",          "icon": "cloudfront",  "tile": "bare", "row": 0, "col": 1, "group": "aws" },
+    { "id": "alb",   "name": "Elastic Load Balancing", "role": "ALB",          "icon": "alb",         "tile": "bare", "row": 0, "col": 2, "group": "public" },
+    { "id": "ecs",   "name": "AWS Fargate",            "role": "ECS · 컨테이너", "icon": "fargate",     "tile": "bare", "row": 0, "col": 3, "group": "private", "focal": true },
+    { "id": "s3",    "name": "Amazon S3",              "role": "정적 파일",     "icon": "s3",          "tile": "bare", "row": 1, "col": 1, "group": "aws" },
+    { "id": "rds",   "name": "Amazon RDS",             "role": "PostgreSQL",   "icon": "rds",         "tile": "bare", "row": 1, "col": 3, "group": "private" },
+    { "id": "cache", "name": "Amazon ElastiCache",     "role": "Redis",        "icon": "elasticache", "tile": "bare", "row": 1, "col": 4, "group": "private" }
+  ],
+  "edges": [
+    { "from": "user", "to": "cf",    "kind": "primary",  "label": "HTTPS" },
+    { "from": "cf",   "to": "alb",   "kind": "primary",  "label": "/api" },
+    { "from": "cf",   "to": "s3",    "kind": "internal", "label": "정적 파일" },
+    { "from": "alb",  "to": "ecs",   "kind": "primary",  "label": "HTTP" },
+    { "from": "ecs",  "to": "rds",   "kind": "internal", "label": "SQL" },
+    { "from": "ecs",  "to": "cache", "kind": "internal", "label": "cache" }
+  ]
+}

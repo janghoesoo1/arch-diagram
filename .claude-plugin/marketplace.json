@@ -1,0 +1,15 @@
+{
+  "name": "arch-diagram",
+  "metadata": {
+    "description": "Draw readable architecture diagrams (system / stack / infra / cloud / service topology — 아키텍처 · 시스템 구성도 · 기술 스택 · 인프라 구성도) as self-contained HTML (light + dark), PNG, React/TSX, or an artifact: real brand logos (svgl, devicon, official AWS / Google Cloud / Azure icons, Lucide pictograms), labeled group boxes, orthogonal arrows that never cross text, a legend strip, and first-class Korean typography (embedded Pretendard, Hangul width budgets)."
+  },
+  "owner": {
+    "name": "janghoesoo"
+  },
+  "plugins": [
+    {
+      "name": "arch-diagram",
+      "source": "./"
+    }
+  ]
+}

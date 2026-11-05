@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>주문 서비스 아키텍처</title>
+<!-- KR-FONT: build.py replaces this comment -->
+<style>
+:root {
+  color-scheme: light;
+  --color-paper:   oklch(98.5% 0.004 250);
+  --color-paper-2: oklch(96.5% 0.005 252);
+  --color-rule:    oklch(93% 0.007 255);
+  --color-rule-2:  oklch(83% 0.011 255);
+  --color-muted:   oklch(56% 0.013 255);
+  --color-neutral: oklch(46% 0.015 255);
+  --color-ink-2:   oklch(34% 0.018 257);
+  --color-ink:     oklch(24% 0.020 258);
+  --color-accent:  oklch(58% 0.20 256);
+  --color-graphite:oklch(24% 0.018 260);
+  --color-g1:      oklch(40% 0.02 258);     /* Vercel: near-black brand → graphite group */
+  --color-g1-soft: oklch(60% 0.02 258);
+  --color-g1-ink:  oklch(34% 0.02 258);
+  --color-g1-tint: oklch(95% 0.004 258 / .5);
+  --color-accent-soft: oklch(58% 0.20 256 / .45);
+  --color-accent-tint: oklch(97% 0.012 256 / .5);
+  --color-g3:      oklch(70% 0.01 255);
+  --color-g3-tint: oklch(95% 0.004 255 / .6);
+  --font-kr: "Pretendard", "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic";
+  --font-display: "Geist", var(--font-kr), "Hiragino Sans", "Noto Sans JP", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Geist", var(--font-kr), "Hiragino Sans", "Noto Sans JP", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, var(--font-kr), monospace;
+  --space-xs: 4px; --space-sm: 8px; --space-md: 16px; --space-lg: 24px; --space-xl: 40px; --space-2xl: 64px;
+  --radius-card: 10px; --radius-tile: 12px;
+  --color-veil: oklch(98.5% 0.004 250 / .78);
+}
+[data-theme="dark"] {
+  color-scheme: dark;
+  --color-paper:   oklch(18% 0.012 255);
+  --color-paper-2: oklch(22% 0.014 255);
+  --color-rule:    oklch(24% 0.013 255);
+  --color-rule-2:  oklch(38% 0.018 255);
+  --color-muted:   oklch(65% 0.014 255);
+  --color-neutral: oklch(72% 0.012 255);
+  --color-ink-2:   oklch(85% 0.010 255);
+  --color-ink:     oklch(94% 0.008 255);
+  --color-accent:  oklch(70% 0.16 256);
+  --color-graphite:oklch(31% 0.020 260);
+  --color-g1:      oklch(75% 0.01 258);
+  --color-g1-soft: oklch(55% 0.01 258);
+  --color-g1-ink:  oklch(88% 0.01 258);
+  --color-g1-tint: oklch(26% 0.008 258 / .5);
+  --color-accent-soft: oklch(70% 0.16 256 / .5);
+  --color-accent-tint: oklch(28% 0.045 256 / .35);
+  --color-g3:      oklch(45% 0.01 255);
+  --color-g3-tint: oklch(24% 0.006 255 / .6);
+  --color-veil: oklch(18% 0.012 255 / .78);
+}
+@font-face { font-family:"Geist"; font-style:normal; font-weight:100 900; font-display:swap;
+  src:url(data:font/woff2;base64,%%FONT_DISPLAY%%) format("woff2"); }
+@font-face { font-family:"JetBrains Mono"; font-style:normal; font-weight:100 800; font-display:swap;
+  src:url(data:font/woff2;base64,%%FONT_JBM%%) format("woff2"); }
+.kicker, .node .role, .el, .legend, .foot { letter-spacing: 0.04em; }
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body { overflow-x: clip; }
+body { background: var(--color-paper); color: var(--color-ink); font-family: var(--font-body);
+  padding: var(--space-xl) var(--space-lg) var(--space-2xl); word-break: keep-all; overflow-wrap: anywhere; }
+.page { width: fit-content; max-width: 100%; margin: 0 auto; }
+.head { display:grid; grid-template-columns: 1fr auto; gap: var(--space-lg); align-items:end;
+  padding-bottom: var(--space-md); border-bottom: 1px solid var(--color-rule-2); margin-bottom: var(--space-lg); }
+.kicker { font-family: var(--font-mono); font-size: 11px; color: var(--color-accent); margin-bottom: var(--space-sm); }
+h1 { font-family: var(--font-display); font-weight: 700; font-size: clamp(22px, 4vw, 30px); letter-spacing: -0.005em; line-height: 1.25; }
+.lede { max-width: 320px; font-size: 12px; line-height: 1.7; color: var(--color-neutral); padding-bottom: 2px; }
+@media (max-width: 680px) { .head { grid-template-columns: 1fr; align-items:start; } .lede { max-width:none; } }
+.figure { width: fit-content; max-width: 100%; }
+.scroller { overflow-x: auto; border: 1px solid var(--color-rule-2); border-radius: var(--radius-card); }
+.canvas { position: relative; width: 840px; height: 560px; background: var(--color-paper);
+  background-image: linear-gradient(var(--color-rule) 1px, transparent 1px), linear-gradient(90deg, var(--color-rule) 1px, transparent 1px);
+  background-size: 24px 24px; background-position: -1px -1px; }
+.group { position:absolute; border-radius: var(--radius-tile); }
+.g-label { position:absolute; top:12px; left:12px; display:flex; align-items:center; gap:6px;
+  font-family: var(--font-display); font-size: 12px; font-weight: 600; color: var(--color-neutral); white-space: nowrap; }
+.g-label img { width: 14px; height: 14px; }
+.g-label img.dk, .tile img.dk { display:none; }
+[data-theme="dark"] .g-label img.lt, [data-theme="dark"] .tile img.lt { display:none; }
+[data-theme="dark"] .g-label img.dk, [data-theme="dark"] .tile img.dk { display:block; }
+[data-theme="dark"] .g-label img.plate { background:#fff; border-radius:3px; padding:2px; width:18px; height:18px; }
+.group.ga { border:1.5px solid var(--color-g1); background: var(--color-g1-tint); }
+.group.gb { border:1.5px solid var(--color-accent-soft); background: var(--color-accent-tint); }
+.group.gc { border:1.5px solid var(--color-g3); background: var(--color-g3-tint); }
+.group.ga > .g-label { color: var(--color-g1-ink); }
+.group.gb > .g-label { color: var(--color-accent); }
+.group.gc > .g-label { color: var(--color-ink-2); }
+.node { position:absolute; width:132px; text-align:center; }
+.node.wide { width:172px; }
+.tile { width:60px; height:60px; margin:0 auto; border-radius: var(--radius-tile); background:#fff; border:1px solid var(--color-rule-2);
+  display:grid; place-items:center; box-shadow: 0 1px 2px oklch(24% 0.02 258 / 0.05); transition: border-color .15s cubic-bezier(0.16,1,0.3,1); }
+.node:hover .tile { border-color: var(--color-accent); }
+.tile img { width:34px; height:34px; object-fit:contain; }
+.tile.dark { background: var(--color-graphite); border-color: var(--color-graphite); }
+.tile.focal { border:1.5px solid var(--color-accent); box-shadow: 0 0 0 3px var(--color-accent-tint); }
+.node .name { font-family: var(--font-display); font-weight:600; font-size:13px; line-height:1.3; margin-top: var(--space-sm); letter-spacing:0; }
+.node .role { font-family: var(--font-mono); font-size:9.5px; line-height:1.3; color: var(--color-muted); margin-top:2px; }
+.node .name span, .node .role span { background: var(--color-veil); backdrop-filter: blur(1.5px); padding: 0 var(--space-xs); border-radius: 3px;
+  -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+svg.edges { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
+.e  { stroke: var(--color-accent); stroke-width:1.6; fill:none; }
+.n  { stroke: var(--color-neutral); stroke-width:1.4; fill:none; }
+.dash { stroke-dasharray:4 5; }
+.el { font-family: var(--font-mono); font-size:10.5px; fill: var(--color-neutral); paint-order: stroke; stroke: var(--color-paper); stroke-width:4px; stroke-linejoin:round; }
+.el.a { fill: var(--color-accent); }
+.legend { display:flex; gap: var(--space-lg); align-items:center; margin-top: var(--space-md); font-family: var(--font-mono); font-size:10px; color: var(--color-muted); flex-wrap:wrap; }
+.legend .sw { display:inline-block; width:30px; vertical-align:middle; margin-right:6px; border-top:1.6px solid var(--color-accent); }
+.legend .sw.n { border-color: var(--color-neutral); border-top-width:1.4px; }
+.legend .sw.dash { border-top-style: dashed; }
+.foot { margin-top: var(--space-xl); padding-top: var(--space-md); border-top: 1px solid var(--color-rule-2); display:flex; justify-content:space-between; gap: var(--space-md); flex-wrap:wrap;
+  font-family: var(--font-mono); font-size:10px; color: var(--color-muted); }
+.foot a { color: inherit; text-decoration-color: var(--color-rule-2); text-underline-offset: 2px; }
+.foot a:hover { color: var(--color-accent); }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="head">
+    <div>
+      <div class="kicker">arch-diagram · 예제</div>
+      <h1>주문 서비스 아키텍처</h1>
+    </div>
+    <p class="lede">사용자 요청은 Vercel 위의 Next.js와 Hono API를 지나 Neon·Upstash에 닿고, 결제는 외부 PG로 나간다. GitHub Actions가 배포한다.</p>
+  </header>
+
+  <figure class="figure">
+  <div class="scroller">
+  <div class="canvas" role="img" aria-label="사용자가 HTTPS로 Vercel의 Next.js에 접속하고, Next.js는 같은 Vercel 배포의 Hono API를 RPC로 호출한다. Hono는 Neon PostgreSQL에 SQL을 보내고 Upstash Redis를 캐시로 쓰며, 결제 요청을 외부 결제 대행사에 보내 webhook으로 결과를 받는다. GitHub Actions가 Vercel에 배포한다.">
+
+    <!-- GROUPS -->
+    <div class="group ga" style="left:252px; top:60px; width:324px; height:212px;">
+      <div class="g-label"><img class="lt" src="%%ICON_vercel%%" alt=""><img class="dk" src="%%ICON_vercel_dark%%" alt="">Vercel</div>
+    </div>
+    <div class="group gb" style="left:84px; top:308px; width:180px; height:212px;">
+      <div class="g-label"><img class="lt" src="%%ICON_github%%" alt=""><img class="dk" src="%%ICON_github_dark%%" alt="">GitHub</div>
+    </div>
+    <div class="group gc" style="left:324px; top:308px; width:324px; height:212px;">
+      <div class="g-label"><img src="%%ICON_database%%" alt="">저장소</div>
+    </div>
+
+    <!-- EDGES -->
+    <svg class="edges" viewBox="0 0 840 560" aria-hidden="true">
+      <defs>
+        <marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+          <path d="M0 0 L10 5 L0 10 z" fill="context-stroke"/>
+        </marker>
+      </defs>
+      <!-- primary flow: 사용자 → Next.js → Hono → 결제 대행사 -->
+      <path class="e" d="M144 150 H306" marker-end="url(#ar)"/>
+      <text class="el a" x="225" y="142" text-anchor="middle">HTTPS</text>
+      <path class="e" d="M376 150 H450" marker-end="url(#ar)"/>
+      <text class="el a" x="413" y="142" text-anchor="middle">RPC</text>
+      <path class="e" d="M520 146 H682" marker-end="url(#ar)"/>
+      <text class="el a" x="601" y="138" text-anchor="middle">결제 요청</text>
+      <!-- return: 결제 대행사 → Hono (webhook) -->
+      <path class="n dash" d="M682 170 H520" marker-end="url(#ar)"/>
+      <text class="el" x="601" y="162" text-anchor="middle">webhook</text>
+      <!-- Hono → stores: box bottom → tile top, fanned attach points 24px apart -->
+      <path class="n" d="M474 226 V292 H414 V362" marker-end="url(#ar)"/>
+      <text class="el" x="444" y="284" text-anchor="middle">SQL</text>
+      <path class="n" d="M498 226 V292 H558 V362" marker-end="url(#ar)"/>
+      <text class="el" x="528" y="284" text-anchor="middle">cache</text>
+      <!-- deploy: GitHub Actions → Vercel (points at the representative node inside the group) -->
+      <path class="n dash" d="M174 362 V292 H342 V226" marker-end="url(#ar)"/>
+      <text class="el" x="258" y="284" text-anchor="middle">deploy</text>
+    </svg>
+
+    <!-- NODES -->
+    <div class="node" style="left:44px;top:120px">
+      <div class="tile"><img src="%%ICON_user%%" alt=""></div>
+      <div class="name"><span>사용자</span></div><div class="role"><span>browser</span></div>
+    </div>
+    <div class="node" style="left:276px;top:120px">
+      <div class="tile"><img src="%%ICON_nextjs%%" alt=""></div>
+      <div class="name"><span>Next.js</span></div><div class="role"><span>프론트엔드 · SSR</span></div>
+    </div>
+    <div class="node" style="left:420px;top:120px">
+      <div class="tile focal"><img src="%%ICON_hono%%" alt=""></div>
+      <div class="name"><span>Hono API</span></div><div class="role"><span>백엔드 · RPC</span></div>
+    </div>
+    <div class="node" style="left:652px;top:120px">
+      <div class="tile"><img src="%%ICON_pg%%" alt=""></div>
+      <div class="name"><span>결제 대행사</span></div><div class="role"><span>PG · webhook</span></div>
+    </div>
+    <div class="node" style="left:108px;top:368px">
+      <div class="tile"><img src="%%ICON_githubactions%%" alt=""></div>
+      <div class="name"><span>GitHub Actions</span></div><div class="role"><span>CI · 배포</span></div>
+    </div>
+    <div class="node" style="left:348px;top:368px">
+      <div class="tile"><img src="%%ICON_neon%%" alt=""></div>
+      <div class="name"><span>Neon</span></div><div class="role"><span>PostgreSQL 16</span></div>
+    </div>
+    <div class="node" style="left:492px;top:368px">
+      <div class="tile"><img src="%%ICON_upstash%%" alt=""></div>
+      <div class="name"><span>Upstash</span></div><div class="role"><span>Redis 캐시</span></div>
+    </div>
+
+  </div>
+  </div>
+  <figcaption class="legend">
+    <span><span class="sw"></span>주 요청 경로</span>
+    <span><span class="sw n"></span>내부 연결</span>
+    <span><span class="sw n dash"></span>비동기 · 배포</span>
+  </figcaption>
+  </figure>
+
+  <div class="foot">
+    <span>arch-diagram 예제 · 주문 서비스</span>
+    <span>icons: svgl / devicon / Lucide · made with <a href="https://github.com/janghoesoo1/arch-diagram" target="_blank" rel="noopener">arch-diagram</a></span>
+  </div>
+
+</div>
+</body>
+</html>

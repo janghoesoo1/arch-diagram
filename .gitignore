@@ -1,0 +1,11 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.DS_Store
+.claude/
+.mcp.json
+# vendor icon packages and loose vendor icon files are never committed (see THIRD_PARTY_LICENSES.md)
+icons/
+icons-*/
+*.zip

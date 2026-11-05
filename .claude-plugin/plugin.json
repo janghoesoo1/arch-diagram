@@ -1,0 +1,29 @@
+{
+  "name": "arch-diagram",
+  "description": "Draw readable architecture diagrams (system / stack / infra / cloud / service topology — 아키텍처 · 시스템 구성도 · 기술 스택 · 인프라 구성도) as self-contained HTML (light + dark), PNG, React/TSX, or an artifact: real brand logos (svgl, devicon, official AWS / Google Cloud / Azure icons, Lucide pictograms), labeled group boxes, orthogonal arrows that never cross text, a legend strip, and first-class Korean typography (embedded Pretendard, Hangul width budgets).",
+  "version": "0.1.0",
+  "author": {
+    "name": "janghoesoo",
+    "url": "https://github.com/janghoesoo1"
+  },
+  "homepage": "https://github.com/janghoesoo1/arch-diagram",
+  "repository": "https://github.com/janghoesoo1/arch-diagram",
+  "license": "MIT",
+  "keywords": [
+    "diagrams",
+    "architecture",
+    "stack",
+    "infrastructure",
+    "cloud",
+    "aws",
+    "gcp",
+    "azure",
+    "logos",
+    "korean",
+    "한글",
+    "아키텍처",
+    "html",
+    "png",
+    "tsx"
+  ]
+}

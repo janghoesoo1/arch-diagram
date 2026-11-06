@@ -127,9 +127,28 @@ scripts/                   저장소 게이트 (test_check, verify_package)
 docs/                      예제 PNG, ADR
 ```
 
+## 애니메이션과 스케치 스타일
+
+기본 Professional 출력은 그대로 유지됩니다. 같은 Spec과 Geometry 위에 선택적으로 표현을 추가합니다.
+
+```bash
+/arch-diagram:draw "Kafka 주문 처리" --style hybrid-sketch
+/arch-diagram:draw "Kafka 주문 처리" --style full-sketch --animate --animation-mode combined --gif
+python3 skills/arch-diagram/scripts/render.py spec.json out.html --icons icons --animate --animation-mode flow --svg --gif --gif-fps 15 --gif-width 900
+```
+
+`--style`은 `professional`, `hybrid-sketch`, `full-sketch`를 지원합니다. `--animate`와
+`--animation-mode draw|flow|steps|combined`로 재생하며, 일시정지·재시작·속도·반복 제어와
+동작 줄이기 설정을 지원합니다. GIF는 `--gif`로 명시하며 `--animate`가 필요합니다.
+`--gif-duration`은 전체 한 주기의 재생 시간을 설정합니다. `--help`에서 모든 옵션을 확인할 수 있습니다.
+HTML 기능은 새 설치 의존성이 없고, SVG는 Playwright, GIF는 Playwright와 Pillow를 선택적으로 사용합니다.
+SVG는 HTML 배치를 포함하는 `foreignObject` 방식이므로 브라우저 감상용이며 일부 벡터 편집기는 지원하지 않습니다.
+자세한 제약과 예제는 [표현 옵션 문서](skills/arch-diagram/references/presentation.md)와
+[ADR 0003](docs/adr/0003-animation-sketch.md)에 기록했습니다.
+
 ## 의도적으로 뺀 것
 
-diagram-design의 나머지 38개 다이어그램 타입, 브랜드 프로필 온보딩, Mermaid/draw.io 가져오기, 애니메이션, stack-diagram의 공개 갤러리 공유, 그리고 archify의 Node 렌더러·9개 다른 다이어그램 타입·explainer·모션·공유 카드·브랜드 마크 카탈로그. 이 플러그인은 아키텍처 다이어그램 하나를 잘 그리는 데 집중합니다 ([ADR 0001](docs/adr/0001-one-skill-from-two-lineages.md), [ADR 0002](docs/adr/0002-spec-first-delivery-from-archify.md)).
+diagram-design의 나머지 38개 다이어그램 타입, 브랜드 프로필 온보딩, Mermaid/draw.io 가져오기, stack-diagram의 공개 갤러리 공유, 그리고 archify의 Node 렌더러·9개 다른 다이어그램 타입·explainer·공유 카드·브랜드 마크 카탈로그. 이 플러그인은 아키텍처 다이어그램 하나를 잘 그리는 데 집중합니다 ([ADR 0001](docs/adr/0001-one-skill-from-two-lineages.md), [ADR 0002](docs/adr/0002-spec-first-delivery-from-archify.md)).
 
 ## 라이선스
 

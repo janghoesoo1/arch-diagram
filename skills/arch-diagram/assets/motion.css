@@ -1,0 +1,9 @@
+/* 기존 구조 위에 표시하는 애니메이션과 재생 제어의 스타일 */
+.arch-motion-controls { display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin:12px 0; font:12px var(--font-display); color:var(--color-ink); }
+.arch-motion-controls button,.arch-motion-controls select { font:inherit; color:inherit; background:var(--color-paper); border:1px solid var(--color-rule-2); border-radius:5px; padding:5px 8px; }
+.arch-motion-overlay { position:absolute; inset:0; width:100%; height:100%; z-index:1; pointer-events:none; overflow:hidden; }
+.arch-motion-overlay circle { fill:var(--color-accent); }
+.arch-motion-overlay path,.arch-motion-overlay rect { fill:none; stroke:var(--color-accent); stroke-width:2; }
+.arch-step .tile { outline:2px solid var(--color-accent); outline-offset:-3px; }
+@media (prefers-reduced-motion:reduce),print { .arch-motion-overlay { display:none!important; } .arch-step .tile { outline:none; } }
+@media print { .arch-motion-controls { display:none!important; } }

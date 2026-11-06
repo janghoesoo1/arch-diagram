@@ -15,6 +15,15 @@ Three lineages: the icon-and-canvas pipeline of `stack-diagram`, the editorial d
 
 ## 0. Philosophy — readability is the deliverable
 
+Optional presentation is documented in `references/presentation.md`: `--style
+professional|hybrid-sketch|full-sketch`, `--animate`, `--animation-mode
+draw|flow|steps|combined`, `--svg`, `--gif`, `--gif-fps`, `--gif-width`, and
+`--gif-duration`. Professional/static remains the default. All styles share the
+existing geometry and original logos. HTML needs no new library; SVG uses optional
+Playwright, and GIF also uses Pillow. Forward these flags to `scripts/render.py`;
+`--help` lists them. GIF is explicit and requires animation. Keep the readability
+gate; do not redraw or warp icons. TSX remains the existing static conversion workflow.
+
 - **The best move is usually deletion.** Every node is a distinct idea; two that always travel together are one node. Every arrow carries information; if layout already says it, drop the line.
 - **Target density 4/10.** Default budget: **≤ 9 nodes, ≤ 12 edges, ≤ 4 groups, 1 focal tile, one accent-colored primary path.** Above that, an overview plus a detail diagram.
 - **One signal color.** `primary` edges mark *the* request/data path. Everything else is neutral.

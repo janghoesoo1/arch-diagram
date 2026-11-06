@@ -10,9 +10,18 @@ scripts/                 repository-only gates (tests, package verifier)
 docs/                    rendered example PNGs, ADRs
 ```
 
-The four manifests must carry the same name, description, version, author, repository, license and keywords; `scripts/verify_package.py` fails on drift. Bump `version` in all of them together.
+The three native manifests (`.claude-plugin/plugin.json`, `.codex-plugin/plugin.json`, `.factory-plugin/plugin.json`) must carry the same name, description, version, author, repository, license and keywords; `scripts/verify_package.py` fails on drift. Bump `version` in all of them together. Marketplace entries resolve to `./` and do not duplicate the version.
 
 A locally installed copy is cached per version by Claude Code (`~/.claude/plugins/cache/arch-diagram/arch-diagram/<version>/`); after a bump run `claude plugin marketplace update arch-diagram && claude plugin update arch-diagram@arch-diagram` to pick it up.
+
+## Release and client updates
+
+1. Bump the three native manifest versions together and add the release notes to `CHANGELOG.md` before merging a release change. Run `python3 scripts/verify_package.py` and the relevant tests.
+2. Merge the reviewed change into `main`. Git-based marketplace clients can then fetch it; this does not force an update or reload on existing clients.
+3. When publishing the downloadable skill ZIP, push the matching `v<version>` tag on the release commit. `.github/workflows/release.yml` creates the GitHub release and ZIP only for `v*` tags, not a merge to `main`.
+4. Follow the [README client update instructions](README.md#설치). Claude Code users opt into auto-update per marketplace, then reload plugins or start a new session after an update. Confirm the installed version with `claude plugin list`. A local-path marketplace also needs its source checkout updated first.
+
+Auto-update and session reload belong to the client. Do not add plugin hooks that silently change user preferences, run updates, or restart sessions. Codex, Factory and manually uploaded skill ZIPs have separate client update procedures; the Claude Code instructions do not configure those clients.
 
 ## Gates
 

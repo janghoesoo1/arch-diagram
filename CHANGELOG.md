@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.0 — Unreleased
+
+- Optional draw, flow, steps and combined animation, with playback controls and reduced-motion support.
+- Hybrid and full sketch styles that preserve canonical layout and brand icons.
+- Optional SVG/GIF exports and staged media publication.
+- Synchronized native plugin versions and explicit Claude Code auto-update, manual update and reload instructions.
+
 ## 0.2.0 — 2026-11-05
 
 The archify lineage: a typed source, a delivery contract, an explorable artifact.

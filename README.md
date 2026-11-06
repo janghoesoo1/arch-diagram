@@ -144,18 +144,24 @@ docs/                      예제 PNG, ADR
 
 ## 애니메이션과 스케치 스타일
 
-기본 Professional 출력은 그대로 유지됩니다. 같은 Spec과 Geometry 위에 선택적으로 표현을 추가합니다.
+옵션 이름을 몰라도 원하는 결과를 말하면 됩니다. 별도 요청이 없으면 깔끔한 정적 HTML을 만듭니다.
 
-```bash
-/arch-diagram:draw "Kafka 주문 처리" --style hybrid-sketch
-/arch-diagram:draw "Kafka 주문 처리" --style full-sketch --animate --animation-mode combined --gif
-python3 skills/arch-diagram/scripts/render.py spec.json out.html --icons icons --animate --animation-mode flow --svg --gif --gif-fps 15 --gif-width 900
+```text
+/arch-diagram:draw 결제 시스템 구성도 그려줘
+/arch-diagram:draw Kafka 주문 처리를 손그림 느낌으로 그려줘
+/arch-diagram:draw Kafka 주문 처리의 데이터 흐름이 움직이게 만들어줘
+/arch-diagram:draw Kafka 주문 처리를 손그림 느낌의 GIF로 저장해줘
+/arch-diagram:export order-service.html PNG로 저장해줘
 ```
 
-`--style`은 `professional`, `hybrid-sketch`, `full-sketch`를 지원합니다. `--animate`와
-`--animation-mode draw|flow|steps|combined`로 재생하며, 일시정지·재시작·속도·반복 제어와
-동작 줄이기 설정을 지원합니다. GIF는 `--gif`로 명시하며 `--animate`가 필요합니다.
-`--gif-duration`은 전체 한 주기의 재생 시간을 설정합니다. `--help`에서 모든 옵션을 확인할 수 있습니다.
+- “손그림 느낌”은 그룹 테두리에 가볍게 적용합니다. “박스까지 전부 손그림”이라고 하면 범위를 넓힙니다. 로고와 글자는 유지됩니다.
+- “움직이게”는 연결선을 따라 흐름을 보여줍니다. “데이터 흐름도”라는 말만으로는 애니메이션을 추가하지 않습니다.
+- “GIF로 저장”은 움직이는 GIF를 추가합니다. 애니메이션 요청만 있으면 HTML로 전달합니다.
+- “선이 그려지게”, “노드를 차례로 강조”, “그려진 다음 흐름이 움직이게”도 지원합니다. 속도와 반복은 결과 HTML에서 조절할 수 있습니다.
+- 수정할 때는 요청한 부분만 바꿉니다. 기존 정적 HTML을 GIF로 바꾸려면 원본 Spec과 아이콘이 필요합니다.
+
+세부 조절이 필요할 때만 [고급 옵션과 자연어 선택 규칙](skills/arch-diagram/references/presentation.md)을 참고하세요.
+기존 CLI 옵션은 그대로 지원하며 `python3 skills/arch-diagram/scripts/render.py --help`에서 확인할 수 있습니다.
 HTML 기능은 새 설치 의존성이 없고, SVG는 Playwright, GIF는 Playwright와 Pillow를 선택적으로 사용합니다.
 SVG는 HTML 배치를 포함하는 `foreignObject` 방식이므로 브라우저 감상용이며 일부 벡터 편집기는 지원하지 않습니다.
 자세한 제약과 예제는 [표현 옵션 문서](skills/arch-diagram/references/presentation.md)와

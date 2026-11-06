@@ -1,6 +1,6 @@
 ---
 description: Export an arch-diagram HTML file to PNG, SVG, animated GIF or a React/TSX component
-argument-hint: "<diagram.html> [--png|--tsx|--both|--svg|--gif] [--scale=2] [--gif-fps=15] [--gif-width=900] [--gif-duration=3] [--canvas|--figure|--full-page] [--output=<path>]"
+argument-hint: "<diagram.html> [PNG / SVG / GIF로 저장]"
 allowed-tools:
   - Read
   - Write
@@ -16,10 +16,12 @@ Full argument string: `$ARGUMENTS`
 
 - `--png`: `scripts/render_png.py <file> <base>.png --scale 2` → `<base>.png` + `<base>-dark.png`, canvas + legend (`--figure`).
 - `--tsx`: `<Name>Diagram.tsx` next to the source.
-- No flag → `--png`.
+- No format requested in words or flags → `--png`. Natural-language format requests
+  follow `references/presentation.md`; existing advanced flags remain supported.
 - `--svg` or `--gif`: follow `references/presentation.md` and run `export_media.py`
   with `--format svg|gif`; map `--gif-fps/width/duration` to `--fps/width/duration`.
-  GIF requires an animated HTML source. SVG contains HTML foreignObject and is intended
+  GIF requires an animated HTML source; for static input follow the source-rebuild rules
+  in `references/presentation.md`, not a silent format substitution. SVG contains HTML foreignObject and is intended
   for browsers, not universal vector editors. Missing optional dependencies are reported,
   not automatically installed.
 

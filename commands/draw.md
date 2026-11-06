@@ -1,6 +1,6 @@
 ---
 description: Draw a readable architecture diagram (real logos, Korean-ready, interactive) from a one-line description or a codebase
-argument-hint: "<describe the stack / 스택 설명 | --repo <path>> [--png] [--tsx] [--artifact] [--dark-only]"
+argument-hint: "<그릴 시스템 설명> [손그림 느낌으로 / 흐름이 움직이게 / GIF로 저장]"
 allowed-tools:
   - Read
   - Write
@@ -22,3 +22,9 @@ Draw an architecture diagram for `$ARGUMENTS` by following the `arch-diagram` sk
 6. **Look at the PNG** (both themes) with the skill's §7 checklist before delivering.
 7. Deliver the HTML (default, interactive). `--png` also hands over the light/dark pair; `--tsx` adds a component per `references/tsx.md`; `--artifact` publishes the HTML with the environment's artifact tool; `--dark-only` renders with `data-theme="dark"` as authored.
 8. Reply briefly: a link to the HTML, the icon sources used, any assumption or omission, and the deep-link hint (`#focus=<id>`) when the user will explore it. Keep the receipt path for troubleshooting only.
+
+Before rendering, apply the natural-language selection rules in `references/presentation.md`.
+Do not ask users to choose technical options. Existing flags, including `--repo`, remain supported. Forward
+`--style`, `--animate`, `--animation-mode`, `--svg`, `--gif`, `--gif-fps`, `--gif-width`
+and `--gif-duration` to render.py. Defaults remain professional and static. Never infer
+GIF from animation alone; `--gif` requires `--animate`. `--help` shows the renderer options.

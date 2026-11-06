@@ -62,7 +62,22 @@ python3 scripts/render.py order-service.json order-service.html --icons icons/ -
 /plugin install arch-diagram@arch-diagram
 ```
 
-로컬 체크아웃에서: `/plugin marketplace add /path/to/arch-diagram` 후 동일하게 설치. Claude Code는 설치 시점의 플러그인을 **버전별로 캐시**하므로, 체크아웃을 수정했다면 매니페스트의 `version`을 올린 뒤 `claude plugin marketplace update arch-diagram && claude plugin update arch-diagram@arch-diagram` 로 갱신하고 세션을 다시 시작하세요.
+로컬 체크아웃에서는 `/plugin marketplace add /path/to/arch-diagram` 후 동일하게 설치합니다.
+
+**Claude Code 업데이트 설정**
+
+1. 설치 후 `/plugin` → Marketplaces → `arch-diagram` → **Enable auto-update**를 선택합니다. 사용자 등록 마켓플레이스는 자동 업데이트가 기본적으로 꺼져 있으며, 이 설정은 각 클라이언트에서 한 번씩 해야 합니다.
+2. 자동 업데이트가 켜져 있으면 세션 시작 후 새 버전을 다운로드합니다. 현재 세션에 적용하려면 `/reload-plugins`를 실행하고, 아니면 다음 세션에서 새 버전을 사용합니다.
+3. 수동으로 갱신하려면 터미널에서 아래 두 명령을 실행한 뒤 Claude Code에서 `/reload-plugins`를 실행하거나 새 세션을 시작합니다.
+
+```bash
+claude plugin marketplace update arch-diagram
+claude plugin update arch-diagram@arch-diagram
+```
+
+`claude plugin list`로 설치 버전을 확인합니다. 플러그인은 클라이언트의 자동 업데이트 설정이나 실행 중인 세션을 임의로 변경하지 않습니다. 비공개 저장소에서는 클라이언트에 저장소 접근 권한도 필요합니다. [Claude Code 공식 업데이트 안내](https://code.claude.com/docs/en/discover-plugins#keep-plugins-updated).
+
+개발자는 배포할 때 세 매니페스트의 버전을 함께 올려야 합니다. `main` 머지만으로 모든 설치본이 즉시 바뀌지는 않습니다. 로컬 경로로 등록했다면 해당 체크아웃을 먼저 최신 코드로 갱신하세요. 배포 절차는 [CONTRIBUTING.md](CONTRIBUTING.md)를 참고하세요.
 
 **Codex**
 

@@ -33,6 +33,18 @@ Next actions
 
 Only `Next actions` when something is warn/fail. With `--json`: `{"status", "counts": {"pass","warn","fail"}, "checks": [{"name","status","message","fix"?}], "timestamp"}`.
 
+## Installed version or update troubleshooting
+
+When the user reports missing new features or asks how to update in Claude Code, use `claude plugin list` to report the installed version. Do not claim it is the latest without checking the intended release. If the CLI is unavailable, report that the version could not be verified.
+
+Provide these actions without executing them as part of this read-only doctor.
+
+1. Enable automatic updates in `/plugin` → Marketplaces → `arch-diagram` → **Enable auto-update**. Third-party marketplaces default to off; this is a per-client preference, not a plugin manifest setting.
+2. To update now, run `claude plugin marketplace update arch-diagram`, then `claude plugin update arch-diagram@arch-diagram` in a terminal. For a local-path marketplace, update its source checkout first. Private repositories require working client credentials.
+3. Run `/reload-plugins` inside Claude Code or start a new session to load the downloaded version. Verify the installed version again with `claude plugin list`.
+
+Never silently enable auto-update or reload an active session. These steps apply to Claude Code, not Codex, Factory or manually uploaded skill ZIPs. See the [official update documentation](https://code.claude.com/docs/en/discover-plugins#keep-plugins-updated).
+
 ## Safety
 
 Read-only. If a check command fails unexpectedly, capture stderr, mark the check, continue. Never claim a check passed unless it was verified in this run.

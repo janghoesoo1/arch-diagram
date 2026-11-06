@@ -1,4 +1,4 @@
-# Export — PNG, artifact, and what SVG is not
+# Export — PNG, SVG, GIF, artifact and TSX
 
 Load this when the user asks to export, save, rasterize, share, or convert a diagram, or invokes `/arch-diagram:export`.
 
@@ -27,9 +27,14 @@ Where the environment offers an artifact / page-publishing tool, publish the bui
 
 See `tsx.md`. Code for their repo, not an artifact.
 
-## SVG — not a target
+## SVG and GIF
 
-The canvas is HTML (absolutely positioned divs with real text layout, `<img>` tiles, CSS veils) over one SVG edge overlay. Flattening it to a single SVG would mean re-implementing text wrapping and losing the embedded fonts; vendor icons are often complex SVGs or rasters. If the user needs a vector, offer the PNG at `--scale 3` or the HTML itself (which scales losslessly in a browser), and say why SVG is not offered.
+See `presentation.md`. SVG preserves the HTML canvas inside SVG `foreignObject`, with
+computed styles, embedded fonts and original image data. Browser viewing is supported;
+many vector editors do not support foreignObject. It is a static light-theme snapshot.
+GIF captures actual animation frames in Chromium and encodes them with optional Pillow.
+PNG settles motion and still captures both themes. With render.py, requested export
+failure now fails the run before replacing any previously delivered files.
 
 ## Naming
 

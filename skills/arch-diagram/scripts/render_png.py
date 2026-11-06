@@ -92,6 +92,7 @@ def main():
         if width + 100 > 1200:
             page.set_viewport_size({"width": width + 100, "height": 1000})
         page.evaluate("document.fonts && document.fonts.ready")
+        page.evaluate("window.ArchDiagramMotion && window.ArchDiagramMotion.settle()")
         page.wait_for_timeout(600)  # let embedded fonts settle
         page.add_style_tag(content=SQUARE_CORNERS)
         if single:

@@ -87,6 +87,11 @@ Routing is automatic: same row → tile side to tile side (a request/return pair
 
 ## Commands
 
+Style and motion are presentation CLI options, not new canonical spec fields. See
+`presentation.md` for `--style`, `--animate`, `--animation-mode`, `--svg`, `--gif`,
+`--gif-fps`, `--gif-width`, and `--gif-duration`. Existing node `note` values are also
+shown during steps. Every style reuses the same layout and relationships.
+
 ```bash
 python3 scripts/render.py spec.json out.html --icons icons/ --kr-font auto --png   # the whole pipeline, atomic
 python3 scripts/layout.py spec.json draft.html --icons icons/                       # just the draft

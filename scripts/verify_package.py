@@ -32,9 +32,11 @@ REQUIRED_FILES = (
     "assets/examples/src/order-service.json", "assets/examples/src/aws-commerce.json", "assets/examples/src/rag-chatbot.json",
     "scripts/fetch_icons.py", "scripts/build.py", "scripts/check.py", "scripts/render_png.py",
     "scripts/layout.py", "scripts/render.py", "scripts/diff.py",
+    "scripts/presentation.py", "scripts/export_media.py", "assets/motion.js", "assets/motion.css", "assets/export-scene.js",
     "references/geometry.md", "references/icons.md", "references/korean.md", "references/style.md",
     "references/tsx.md", "references/export.md", "references/doctor.md",
     "references/spec.md", "references/viewer.md", "references/from-repo.md",
+    "references/presentation.md",
 )
 
 errors: list[str] = []

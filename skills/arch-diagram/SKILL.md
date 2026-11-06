@@ -4,7 +4,7 @@ description: "Draw readable architecture diagrams — system / stack / infra / c
 license: MIT (see LICENSE); bundled fonts are SIL OFL 1.1
 compatibility: Python 3.9+ and network access to fetch logos; PNG output needs Playwright with Chromium; offline-safe Korean needs fonttools + brotli
 metadata:
-  version: "0.2"
+  version: "0.3.0"
 ---
 
 # arch-diagram
@@ -14,6 +14,15 @@ Architecture diagrams that are **readable first**: official logos on white tiles
 Three lineages: the icon-and-canvas pipeline of `stack-diagram`, the editorial discipline of `diagram-design` (deletion first, complexity budget, six connector rules, a11y, Korean font gate), and the delivery model of `archify` (typed source → validated artifact with machine-readable findings, an explorable viewer, delta between versions, repository evidence). Details live in `references/` and load only when needed.
 
 ## 0. Philosophy — readability is the deliverable
+
+Default to professional, static HTML without asking users to choose presentation options.
+For natural-language style, motion or export requests, follow the selection rules in
+`references/presentation.md`: generic sketch means hybrid, generic animation means flow,
+and an explicit GIF request adds animation when drawing. A "data flow diagram" alone
+stays static. Combine independent preferences, retain unchanged choices on revisions,
+and ask only to resolve genuine conflicts or missing source material. Keep advanced
+flags and update instructions out of normal replies. All styles preserve geometry,
+logos and readability; TSX remains static. Optional exports retain their dependency checks.
 
 - **The best move is usually deletion.** Every node is a distinct idea; two that always travel together are one node. Every arrow carries information; if layout already says it, drop the line.
 - **Target density 4/10.** Default budget: **≤ 9 nodes, ≤ 12 edges, ≤ 4 groups, 1 focal tile, one accent-colored primary path.** Above that, an overview plus a detail diagram.
@@ -28,6 +37,7 @@ Three lineages: the icon-and-canvas pipeline of `stack-diagram`, the editorial d
 2. **Fetch icons** — `scripts/fetch_icons.py` (§3, `references/icons.md`).
 3. **Write the spec** — `<slug>.json` per `references/spec.md`: nodes on a row/column grid, groups by membership, edges by endpoint. Main-path neighbours adjacent in one row; a store directly below its owner; group members in contiguous cells.
 4. **Render** — `python3 scripts/render.py <slug>.json <slug>.html --icons <icons-dir> --kr-font auto --png`. It runs spec → layout → build → check → PNG and replaces the output only when every gate passes (§5).
+   Append only the presentation/export flags selected from the user's intent per `references/presentation.md`; do not show a configuration questionnaire.
 5. **Repair from the receipt** — a failing gate prints each finding with its `fix`; edit the spec (never the HTML) and re-run. Two repairs that do not converge mean the content is over budget: split it.
 6. **Look at the PNG** with the §7 checklist before delivering.
 7. **Deliver** — HTML (default, with the viewer), the PNG pair, TSX, or an artifact (§8). For a revision, edit the spec and re-render; for "what changed", `scripts/diff.py` (§9).
@@ -102,7 +112,7 @@ Then confirm in the browser once that focus/reach behave if the user will explor
 - **PNG** — `--png` or `render_png.py` (both themes, canvas + legend, 2×); never redrawn with another tool.
 - **TSX** — `references/tsx.md`, a dependency-free component with the same geometry.
 - **Artifact** — publish the HTML with the environment's artifact tool (build with `--kr-font auto` first when Korean).
-- **SVG** is not a target (`references/export.md` says why).
+- **SVG / GIF** — on explicit request, follow `references/presentation.md`; SVG is a static browser-oriented foreignObject snapshot, GIF captures animation. Never infer GIF from animation alone.
 
 Credit icon sources in the footer; keep vendor icon packages out of repositories. Reply briefly: a link to the HTML, one or two sentences of takeaway for a codebase, any deliberate omission or assumption.
 

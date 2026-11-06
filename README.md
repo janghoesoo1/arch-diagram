@@ -62,7 +62,22 @@ python3 scripts/render.py order-service.json order-service.html --icons icons/ -
 /plugin install arch-diagram@arch-diagram
 ```
 
-로컬 체크아웃에서: `/plugin marketplace add /path/to/arch-diagram` 후 동일하게 설치. Claude Code는 설치 시점의 플러그인을 **버전별로 캐시**하므로, 체크아웃을 수정했다면 매니페스트의 `version`을 올린 뒤 `claude plugin marketplace update arch-diagram && claude plugin update arch-diagram@arch-diagram` 로 갱신하고 세션을 다시 시작하세요.
+로컬 체크아웃에서는 `/plugin marketplace add /path/to/arch-diagram` 후 동일하게 설치합니다.
+
+**Claude Code 업데이트 설정**
+
+1. 설치 후 `/plugin` → Marketplaces → `arch-diagram` → **Enable auto-update**를 선택합니다. 사용자 등록 마켓플레이스는 자동 업데이트가 기본적으로 꺼져 있으며, 이 설정은 각 클라이언트에서 한 번씩 해야 합니다.
+2. 자동 업데이트가 켜져 있으면 세션 시작 후 새 버전을 다운로드합니다. 현재 세션에 적용하려면 `/reload-plugins`를 실행하고, 아니면 다음 세션에서 새 버전을 사용합니다.
+3. 수동으로 갱신하려면 터미널에서 아래 두 명령을 실행한 뒤 Claude Code에서 `/reload-plugins`를 실행하거나 새 세션을 시작합니다.
+
+```bash
+claude plugin marketplace update arch-diagram
+claude plugin update arch-diagram@arch-diagram
+```
+
+`claude plugin list`로 설치 버전을 확인합니다. 플러그인은 클라이언트의 자동 업데이트 설정이나 실행 중인 세션을 임의로 변경하지 않습니다. 비공개 저장소에서는 클라이언트에 저장소 접근 권한도 필요합니다. [Claude Code 공식 업데이트 안내](https://code.claude.com/docs/en/discover-plugins#keep-plugins-updated).
+
+개발자는 배포할 때 세 매니페스트의 버전을 함께 올려야 합니다. `main` 머지만으로 모든 설치본이 즉시 바뀌지는 않습니다. 로컬 경로로 등록했다면 해당 체크아웃을 먼저 최신 코드로 갱신하세요. 배포 절차는 [CONTRIBUTING.md](CONTRIBUTING.md)를 참고하세요.
 
 **Codex**
 
@@ -127,9 +142,34 @@ scripts/                   저장소 게이트 (test_check, verify_package)
 docs/                      예제 PNG, ADR
 ```
 
+## 애니메이션과 스케치 스타일
+
+옵션 이름을 몰라도 원하는 결과를 말하면 됩니다. 별도 요청이 없으면 깔끔한 정적 HTML을 만듭니다.
+
+```text
+/arch-diagram:draw 결제 시스템 구성도 그려줘
+/arch-diagram:draw Kafka 주문 처리를 손그림 느낌으로 그려줘
+/arch-diagram:draw Kafka 주문 처리의 데이터 흐름이 움직이게 만들어줘
+/arch-diagram:draw Kafka 주문 처리를 손그림 느낌의 GIF로 저장해줘
+/arch-diagram:export order-service.html PNG로 저장해줘
+```
+
+- “손그림 느낌”은 그룹 테두리에 가볍게 적용합니다. “박스까지 전부 손그림”이라고 하면 범위를 넓힙니다. 로고와 글자는 유지됩니다.
+- “움직이게”는 연결선을 따라 흐름을 보여줍니다. “데이터 흐름도”라는 말만으로는 애니메이션을 추가하지 않습니다.
+- “GIF로 저장”은 움직이는 GIF를 추가합니다. 애니메이션 요청만 있으면 HTML로 전달합니다.
+- “선이 그려지게”, “노드를 차례로 강조”, “그려진 다음 흐름이 움직이게”도 지원합니다. 속도와 반복은 결과 HTML에서 조절할 수 있습니다.
+- 수정할 때는 요청한 부분만 바꿉니다. 기존 정적 HTML을 GIF로 바꾸려면 원본 Spec과 아이콘이 필요합니다.
+
+세부 조절이 필요할 때만 [고급 옵션과 자연어 선택 규칙](skills/arch-diagram/references/presentation.md)을 참고하세요.
+기존 CLI 옵션은 그대로 지원하며 `python3 skills/arch-diagram/scripts/render.py --help`에서 확인할 수 있습니다.
+HTML 기능은 새 설치 의존성이 없고, SVG는 Playwright, GIF는 Playwright와 Pillow를 선택적으로 사용합니다.
+SVG는 HTML 배치를 포함하는 `foreignObject` 방식이므로 브라우저 감상용이며 일부 벡터 편집기는 지원하지 않습니다.
+자세한 제약과 예제는 [표현 옵션 문서](skills/arch-diagram/references/presentation.md)와
+[ADR 0003](docs/adr/0003-animation-sketch.md)에 기록했습니다.
+
 ## 의도적으로 뺀 것
 
-diagram-design의 나머지 38개 다이어그램 타입, 브랜드 프로필 온보딩, Mermaid/draw.io 가져오기, 애니메이션, stack-diagram의 공개 갤러리 공유, 그리고 archify의 Node 렌더러·9개 다른 다이어그램 타입·explainer·모션·공유 카드·브랜드 마크 카탈로그. 이 플러그인은 아키텍처 다이어그램 하나를 잘 그리는 데 집중합니다 ([ADR 0001](docs/adr/0001-one-skill-from-two-lineages.md), [ADR 0002](docs/adr/0002-spec-first-delivery-from-archify.md)).
+diagram-design의 나머지 38개 다이어그램 타입, 브랜드 프로필 온보딩, Mermaid/draw.io 가져오기, stack-diagram의 공개 갤러리 공유, 그리고 archify의 Node 렌더러·9개 다른 다이어그램 타입·explainer·공유 카드·브랜드 마크 카탈로그. 이 플러그인은 아키텍처 다이어그램 하나를 잘 그리는 데 집중합니다 ([ADR 0001](docs/adr/0001-one-skill-from-two-lineages.md), [ADR 0002](docs/adr/0002-spec-first-delivery-from-archify.md)).
 
 ## 라이선스
 

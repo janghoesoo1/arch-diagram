@@ -60,6 +60,10 @@ PALETTES = {   # --color-g1 family hints: (light g1, g1-soft, g1-ink, g1-tint, d
 }
 
 
+ICON_NAME_RE = re.compile(r"[A-Za-z0-9_-]+")   # same rule as fetch_icons.NAME_RE
+TILE_CLASSES = {"dark", "bare", "res", "wide"}   # the .tile.* rules in template.html
+
+
 class SpecError(Exception):
     pass
 
@@ -112,9 +116,26 @@ def validate_spec(spec: dict) -> dict:
         if g.get("id") in gids:
             problems.append(f"duplicate group id \"{g['id']}\"")
         gids.add(g.get("id"))
+    parent_of = {g.get("id"): g.get("parent") for g in groups}
     for g in groups:
         if g.get("parent") and g["parent"] not in gids:
             problems.append(f"group \"{g['id']}\": parent \"{g['parent']}\" does not exist")
+        seen, p = {g.get("id")}, g.get("parent")
+        while p in parent_of and p not in seen:
+            seen.add(p); p = parent_of[p]
+        if p == g.get("id"):
+            problems.append(f"group \"{g['id']}\": parent chain loops back on itself")
+    for kind, items in (("node", nodes), ("group", groups)):
+        for x in items:
+            if x.get("icon") is not None and not ICON_NAME_RE.fullmatch(str(x["icon"])):
+                problems.append(f"{kind} \"{x.get('id')}\": icon must be a fetch_icons.py name (letters, digits, _ or -)")
+    for n in nodes:
+        if not set(str(n.get("tile") or "").split()) <= TILE_CLASSES:
+            problems.append(f"node \"{n.get('id')}\": tile must be made of {' | '.join(sorted(TILE_CLASSES))}")
+    for x in nodes + groups + (spec.get("edges") or []):
+        if x.get("delta") not in (None, "added", "changed", "removed"):
+            where = x.get("id") or f"{x.get('from')} → {x.get('to')}"
+            problems.append(f"{where}: delta {x.get('delta')!r} must be added | changed | removed")
     for n in nodes:
         if n.get("group") and n["group"] not in gids:
             problems.append(f"node \"{n['id']}\": group \"{n['group']}\" does not exist")
@@ -298,6 +319,8 @@ def layout(spec: dict, icons_dir: Path | None = None) -> dict:
     for key, items in pairs.items():
         leftmost = min(key, key=lambda nid: by_id[nid]["cx"])
         items.sort(key=lambda e: (e["from"] != leftmost, e["i"]))
+        if len(items) > 3:
+            raise SpecError(f"{len(items)} lines between {' and '.join(sorted(key))} in one row: at most 3 — merge them or move a node")
         ys = [30] if len(items) == 1 else [26, 50] if len(items) == 2 else [18, 30, 42][:len(items)]
         for y, e in zip(ys, items):
             e["y"] = by_id[e["from"]]["y0"] + y

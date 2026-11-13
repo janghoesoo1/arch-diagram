@@ -10,7 +10,7 @@ diagram readable — before anyone has to look at a PNG:
               placeholders or %%tokens%%; icons are data URIs; no remote assets; no script
               but the template's self-contained viewer
   a11y        canvas has role="img" + aria-label; <title> set; edge overlay aria-hidden
-  budget      <= 9 nodes (14 with --faithful), <= 12 edges, <= 4 groups, 1 focal tile
+  budget      warn > 9 nodes, fail > 14 (20 with --faithful), <= 12 edges, <= 4 groups, 1 focal tile
   nodes       no overlaps; names fit (Korean counted at 1em per syllable); row spacing
   groups      every node fully inside its group with padding; groups nest or stay apart
   edges       orthogonal only; endpoints anchored to nodes with a 4-10px gap; no edge

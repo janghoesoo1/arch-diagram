@@ -1,7 +1,7 @@
 {
   "name": "arch-diagram",
   "description": "Draw readable architecture diagrams (system / stack / infra / cloud / service topology — 아키텍처 · 시스템 구성도 · 기술 스택 · 인프라 구성도) from a typed JSON spec as self-contained interactive HTML (light + dark, focus / upstream-downstream / route deep links), PNG, React/TSX, or an artifact: real brand logos (svgl, devicon, official AWS / Google Cloud / Azure icons, Lucide pictograms), labeled group boxes, deterministic auto-layout with orthogonal arrows that never cross text, a machine-checked readability gate with fix hints, atomic delivery with a receipt, architecture delta between two versions, repository evidence per node, and first-class Korean typography (embedded Pretendard, Hangul width budgets).",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "author": {
     "name": "janghoesoo",
     "url": "https://github.com/janghoesoo1"

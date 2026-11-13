@@ -107,10 +107,10 @@ droid plugin install arch-diagram@arch-diagram --scope user
 
 | 명령 | 역할 |
 |---|---|
-| `/arch-diagram:draw <설명 \| --repo <path>> [--png] [--tsx] [--artifact]` | 내용 정리 → 아이콘 수집 → **스펙 작성** → `render.py`(배치·빌드·검사·렌더·원자적 전달) → 눈으로 확인 → 전달. `--repo`면 저장소 근거를 노드에 붙임 |
+| `/arch-diagram:draw <설명 \| --repo <path>> [손그림 느낌으로 / 흐름이 움직이게 / GIF로 저장]` | 내용 정리 → 아이콘 수집 → **스펙 작성** → `render.py`(배치·빌드·검사·렌더·원자적 전달) → 눈으로 확인 → 전달. `--repo`면 저장소 근거를 노드에 붙임 |
 | `/arch-diagram:diff <base.json> <head.json> [--render]` | 두 스펙의 아키텍처 delta — 추가·변경·삭제 목록, `--render`로 표시된 그림 |
 | `/arch-diagram:check <file.html>` | 가독성 게이트만 실행 |
-| `/arch-diagram:export <file.html> [--png\|--tsx]` | 라이트/다크 PNG 쌍 또는 React 컴포넌트 |
+| `/arch-diagram:export <file.html> [PNG / SVG / GIF / TSX]` | 라이트/다크 PNG 쌍, SVG 스냅샷, 애니메이션 GIF 또는 React 컴포넌트 |
 | `/arch-diagram:doctor` | 환경 진단 |
 
 명령 없이 "아키텍처 다이어그램 그려줘", "시스템 구성도", "우리 스택 그림으로", "draw our stack" 등으로 말해도 스킬이 뜹니다.

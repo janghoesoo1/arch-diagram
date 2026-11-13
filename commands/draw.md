@@ -20,7 +20,7 @@ Draw an architecture diagram for `$ARGUMENTS` by following the `arch-diagram` sk
 4. Write `<slug>.json` per `references/spec.md` (rows/columns, groups by membership, edges by endpoint). Never hand-place coordinates and never edit the built HTML.
 5. Run `python3 scripts/render.py <slug>.json <slug>.html --icons icons/ --kr-font auto --png` (drop `--kr-font auto` only if fonttools is missing, and say so; drop `--png` only if Playwright is missing, print the install command, and say the PNG was not verified). A non-zero exit is never success: read the findings and their `fix`, repair the **spec**, re-run. Two non-converging repairs mean the content is over budget — split it and say so.
 6. **Look at the PNG** (both themes) with the skill's §7 checklist before delivering.
-7. Deliver the HTML (default, interactive). `--png` also hands over the light/dark pair; `--tsx` adds a component per `references/tsx.md`; `--artifact` publishes the HTML with the environment's artifact tool; `--dark-only` renders with `data-theme="dark"` as authored.
+7. Deliver the HTML (default, interactive). `--png` also hands over the light/dark pair; `--tsx` adds a component per `references/tsx.md`; `--artifact` publishes the HTML with the environment's artifact tool.
 8. Reply briefly: a link to the HTML, the icon sources used, any assumption or omission, and the deep-link hint (`#focus=<id>`) when the user will explore it. Keep the receipt path for troubleshooting only.
 
 Before rendering, apply the natural-language selection rules in `references/presentation.md`.

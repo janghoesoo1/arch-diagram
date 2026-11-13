@@ -14,7 +14,7 @@ Full argument string: `$ARGUMENTS`
 
 ## Defaults
 
-- `--png`: `scripts/render_png.py <file> <base>.png --scale 2` → `<base>.png` + `<base>-dark.png`, canvas + legend (`--figure`).
+- `--png`: `scripts/render_png.py <file> <base>.png --scale 2` → `<base>.png` + `<base>-dark.png`, canvas + legend (default selector `.figure`; `--selector .canvas` for the diagram alone).
 - `--tsx`: `<Name>Diagram.tsx` next to the source.
 - No format requested in words or flags → `--png`. Natural-language format requests
   follow `references/presentation.md`; existing advanced flags remain supported.

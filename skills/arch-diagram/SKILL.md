@@ -4,7 +4,7 @@ description: "Draw readable architecture diagrams — system / stack / infra / c
 license: MIT (see LICENSE); bundled fonts are SIL OFL 1.1
 compatibility: Python 3.9+ and network access to fetch logos; PNG output needs Playwright with Chromium; offline-safe Korean needs fonttools + brotli
 metadata:
-  version: "0.3.0"
+  version: "0.3.1"
 ---
 
 # arch-diagram

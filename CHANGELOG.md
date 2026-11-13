@@ -1,15 +1,18 @@
 # Changelog
 
-## 0.3.0 — Unreleased
+## 0.3.1 — Unreleased
+
+- Spec validation rejects group parent cycles (previously a hang), more than three same-row lines between two tiles (previously a crash), `tile`/`delta` values that are not the documented words (previously written into HTML attributes unescaped) and icon names `fetch_icons.py` cannot produce.
+- `diff.py` tells parallel edges between the same pair apart by label; sketch styles place their SVG correctly when text contains U+2028; a malformed `name=URL` no longer aborts the whole icon batch.
+- SKILL.md description fits the 1024-character Agent Skills cap (now gated) and names sketch/animation/GIF; stale `--dark-only` and `--figure` command text removed; file lists and doctor checks cover the 0.3.0 scripts and assets.
+
+## 0.3.0 — 2026-11-06
 
 - Natural-language style, animation and export selection with conservative defaults, concise command hints and explicit revision/conflict handling.
 - Optional draw, flow, steps and combined animation, with playback controls and reduced-motion support.
 - Hybrid and full sketch styles that preserve canonical layout and brand icons.
 - Optional SVG/GIF exports and staged media publication.
 - Synchronized native plugin versions and explicit Claude Code auto-update, manual update and reload instructions.
-- Spec validation rejects group parent cycles (previously a hang), more than three same-row lines between two tiles (previously a crash), `tile`/`delta` values that are not the documented words (previously written into HTML attributes unescaped) and icon names `fetch_icons.py` cannot produce.
-- `diff.py` tells parallel edges between the same pair apart by label; sketch styles place their SVG correctly when text contains U+2028; a malformed `name=URL` no longer aborts the whole icon batch.
-- SKILL.md description fits the 1024-character Agent Skills cap (now gated) and names sketch/animation/GIF; stale `--dark-only` and `--figure` command text removed; file lists and doctor checks cover the 0.3.0 scripts and assets.
 
 ## 0.2.0 — 2026-11-05
 

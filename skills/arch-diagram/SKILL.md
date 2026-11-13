@@ -1,10 +1,10 @@
 ---
 name: arch-diagram
-description: "Draw readable architecture diagrams — system / stack / infra / cloud / service-topology / 아키텍처 / 시스템 구성도 / 기술 스택 / 인프라 구성도 / 서비스 토폴로지 — from a typed JSON spec, as self-contained interactive HTML (light + dark, focus / upstream-downstream / route deep links), PNG, a React/TSX component, or a live artifact. Real brand logos on tiles (svgl, devicon, official AWS / Google Cloud / Azure icon packages, Lucide pictograms), labeled group boxes (VPC, subnet, vendor, trust boundary), deterministic auto-layout with orthogonal arrows that never cross label text, a machine-checked readability gate, atomic delivery with a receipt, architecture delta between two versions, repository evidence per node, and first-class Korean typography (Pretendard / Noto Sans KR embedded, Hangul width budgets, lang=ko). Use whenever the user asks for an architecture, system, stack, infra, deployment, or service diagram, a tech-stack overview, a diagram of a codebase, a diff of two architectures, or wants logos arranged into a picture of how services connect — in any language, Korean especially, even without naming an output format."
+description: "Draw readable architecture diagrams — system / stack / infra / cloud / service-topology / 아키텍처 / 시스템 구성도 / 기술 스택 / 인프라 구성도 / 서비스 토폴로지 — from a typed JSON spec, as self-contained interactive HTML (light + dark, focus / upstream-downstream / route deep links), PNG, SVG, animated GIF, a React/TSX component, or a live artifact. Real brand logos (svgl, devicon, AWS / Google Cloud / Azure icons, Lucide), labeled group boxes (VPC, subnet, vendor, trust boundary), deterministic auto-layout with orthogonal arrows that never cross text, a machine-checked readability gate, architecture delta between two versions, optional hand-drawn sketch style and flow animation (손그림 · 움직이는 다이어그램), and first-class Korean typography. Use whenever the user asks for an architecture, system, stack, infra, deployment, or service diagram, a tech-stack overview, a diagram of a codebase, a diff of two architectures, or an animated or sketch-style architecture picture — in any language, Korean especially, even without naming an output format."
 license: MIT (see LICENSE); bundled fonts are SIL OFL 1.1
 compatibility: Python 3.9+ and network access to fetch logos; PNG output needs Playwright with Chromium; offline-safe Korean needs fonttools + brotli
 metadata:
-  version: "0.3.0"
+  version: "0.3.1"
 ---
 
 # arch-diagram
@@ -33,11 +33,14 @@ logos and readability; TSX remains static. Optional exports retain their depende
 
 ## 1. Workflow
 
+Script and reference paths below are relative to this SKILL.md's directory; from a diagram folder run them as `python3 <skill>/scripts/…`.
+
 1. **Settle the content** — nodes, groups, edges, the one primary path; apply the budget (§2). State the plan in one short message before drawing unless the request already pins everything. For a real codebase read `references/from-repo.md` and collect `sources` while reading.
 2. **Fetch icons** — `scripts/fetch_icons.py` (§3, `references/icons.md`).
 3. **Write the spec** — `<slug>.json` per `references/spec.md`: nodes on a row/column grid, groups by membership, edges by endpoint. Main-path neighbours adjacent in one row; a store directly below its owner; group members in contiguous cells.
 4. **Render** — `python3 scripts/render.py <slug>.json <slug>.html --icons <icons-dir> --kr-font auto --png`. It runs spec → layout → build → check → PNG and replaces the output only when every gate passes (§5).
    Append only the presentation/export flags selected from the user's intent per `references/presentation.md`; do not show a configuration questionnaire.
+   Drop `--kr-font auto` only if fonttools is missing and `--png` only if Playwright is missing; say so, print the install command, and note the PNG was not verified. A `--png` run without Playwright exits non-zero and delivers nothing.
 5. **Repair from the receipt** — a failing gate prints each finding with its `fix`; edit the spec (never the HTML) and re-run. Two repairs that do not converge mean the content is over budget: split it.
 6. **Look at the PNG** with the §7 checklist before delivering.
 7. **Deliver** — HTML (default, with the viewer), the PNG pair, TSX, or an artifact (§8). For a revision, edit the spec and re-render; for "what changed", `scripts/diff.py` (§9).
@@ -141,6 +144,7 @@ The annotated spec renders with green (added), amber (changed) and ghosted dashe
 ## 11. Files
 
 - `assets/template.html` — canvas, tokens, viewer; markup = format reference for hand-placed drafts
-- `assets/examples/src/*.json` — specs: Korean order service, AWS commerce, RAG chatbot; `assets/examples/*.html` built
-- `scripts/fetch_icons.py` · `layout.py` · `build.py` · `check.py` · `render.py` · `render_png.py` · `diff.py`
-- `references/spec.md` · `geometry.md` · `icons.md` · `korean.md` · `viewer.md` · `from-repo.md` · `style.md` · `tsx.md` · `export.md` · `doctor.md`
+- `assets/motion.js` · `motion.css` · `export-scene.js` — optional animation and SVG/GIF capture
+- `assets/examples/src/*.json` — specs: Korean order service, AWS commerce, RAG chatbot; `assets/examples/*.html` built (AWS commerce is spec only)
+- `scripts/fetch_icons.py` · `layout.py` · `build.py` · `check.py` · `render.py` · `render_png.py` · `diff.py` · `presentation.py` · `export_media.py`
+- `references/spec.md` · `geometry.md` · `icons.md` · `korean.md` · `viewer.md` · `from-repo.md` · `style.md` · `tsx.md` · `export.md` · `presentation.md` · `doctor.md`

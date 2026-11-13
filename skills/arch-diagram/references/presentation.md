@@ -86,7 +86,7 @@ The HTML embeds scripts and assets and needs no runtime network or installed lib
 
 ```bash
 pip install playwright Pillow
-python3 -m playwright install chromium
+python3 -m playwright install --with-deps chromium
 python3 scripts/export_media.py out.html out.svg --format svg
 python3 scripts/export_media.py out.html out.gif --format gif --fps 15 --width 900 --duration 3
 ```

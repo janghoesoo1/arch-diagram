@@ -4,7 +4,8 @@
     python3 diff.py BASE.json HEAD.json [--annotate OUT.json] [--json]
 
 Reports nodes, groups and edges that were added, removed or changed (name, role, icon, group,
-row/col for nodes; label for groups; kind/label for edges). Edges are matched by (from, to).
+row/col for nodes; label for groups; kind/label for edges). Edges are matched by (from, to), or
+by (from, to, label) when either spec draws that pair more than once.
 
 --annotate writes HEAD with `delta` markers ("added" | "changed") on nodes, groups and edges,
 and re-inserts removed nodes and edges with `delta: "removed"` so layout.py can draw them as
@@ -34,6 +35,18 @@ def index(items, key):
     return {key(x): x for x in items}
 
 
+def edge_key(*specs):
+    dup = set()
+    for s in specs:
+        pairs = [(e["from"], e["to"]) for e in s.get("edges", [])]
+        dup |= {p for p in pairs if pairs.count(p) > 1}
+    return lambda e: (e["from"], e["to"], e.get("label", "")) if (e["from"], e["to"]) in dup else (e["from"], e["to"])
+
+
+def edge_text(k):
+    return f"{k[0]} → {k[1]}" + (f" [{k[2]}]" if len(k) > 2 else "")
+
+
 def changed_fields(a, b, fields):
     return [f for f in fields if a.get(f) != b.get(f)]
 
@@ -41,7 +54,8 @@ def changed_fields(a, b, fields):
 def diff(base: dict, head: dict) -> dict:
     bn, hn = index(base.get("nodes", []), lambda n: n["id"]), index(head.get("nodes", []), lambda n: n["id"])
     bg, hg = index(base.get("groups", []), lambda g: g["id"]), index(head.get("groups", []), lambda g: g["id"])
-    be, he = index(base.get("edges", []), lambda e: (e["from"], e["to"])), index(head.get("edges", []), lambda e: (e["from"], e["to"]))
+    ek = edge_key(base, head)
+    be, he = index(base.get("edges", []), ek), index(head.get("edges", []), ek)
     rep = {"nodes": {"added": [], "removed": [], "changed": []},
            "groups": {"added": [], "removed": [], "changed": []},
            "edges": {"added": [], "removed": [], "changed": []}}
@@ -100,7 +114,8 @@ def annotate(base: dict, head: dict, rep: dict) -> tuple[dict, list[str]]:
         hg[i]["delta"] = "added"
     for c in rep["groups"]["changed"]:
         hg[c["id"]]["delta"] = "changed"
-    he = index(out.get("edges", []), lambda e: (e["from"], e["to"]))
+    ek = edge_key(base, head)
+    he, be = index(out.get("edges", []), ek), index(base.get("edges", []), ek)
     for k in rep["edges"]["added"]:
         he[tuple(k)]["delta"] = "added"
     for c in rep["edges"]["changed"]:
@@ -108,7 +123,7 @@ def annotate(base: dict, head: dict, rep: dict) -> tuple[dict, list[str]]:
     present = {n["id"] for n in out.get("nodes", [])}
     for k in rep["edges"]["removed"]:
         if k[0] in present and k[1] in present:
-            e = json.loads(json.dumps(index(base.get("edges", []), lambda e: (e["from"], e["to"]))[tuple(k)], ensure_ascii=False))
+            e = json.loads(json.dumps(be[tuple(k)], ensure_ascii=False))
             e["delta"] = "removed"
             out.setdefault("edges", []).append(e)
     return out, unplaced
@@ -138,8 +153,8 @@ def main() -> int:
             for op in ("added", "removed", "changed"):
                 for item in rep[kind][op]:
                     if isinstance(item, str): label = item
-                    elif isinstance(item, list): label = " → ".join(item)
-                    else: label = item.get("id") or " → ".join(item.get("edge", []))
+                    elif isinstance(item, list): label = edge_text(item)
+                    else: label = item.get("id") or edge_text(item["edge"])
                     extra = f" ({', '.join(item['fields'])})" if isinstance(item, dict) and item.get("fields") else ""
                     print(f"{op:<8} {kind[:-1]:<6} {label}{extra}")
         print(f"delta: {rep['total']} change(s)" + (f"; annotated spec → {out_path}" if out_path else ""))

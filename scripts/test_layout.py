@@ -113,6 +113,39 @@ with tempfile.TemporaryDirectory() as td:
         err = str(e)
     ok("spec: non-member inside a group's box rejected", err is not None and "without being a member" in err, err or "no error")
 
+    def synth_error(mutate):
+        s = json.loads(json.dumps(synthetic)); s["nodes"][1]["col"] = 3
+        mutate(s)
+        try:
+            layout.validate_spec(s); layout.layout(s, None)
+            return None
+        except layout.SpecError as e:
+            return str(e)
+    ok("spec: group parent cycle rejected", "loops back" in (synth_error(lambda s: s["groups"].extend([{"id": "p", "label": "P", "parent": "q"}, {"id": "q", "label": "Q", "parent": "p"}])) or ""))
+    ok("spec: self-parent group rejected", "loops back" in (synth_error(lambda s: s["groups"][0].update(parent="g")) or ""))
+    ok("spec: markup in tile rejected", "tile must be" in (synth_error(lambda s: s["nodes"][0].update(tile='x" onclick="alert(1)')) or ""))
+    ok("spec: unknown delta rejected", "delta" in (synth_error(lambda s: s["edges"][0].update(delta='x" onmouseover="1')) or ""))
+    ok("spec: dotted icon name rejected", "icon must be" in (synth_error(lambda s: s["nodes"][0].update(icon="vue.js")) or ""))
+    ok("spec: shipped tile values accepted", synth_error(lambda s: s["nodes"][0].update(tile="bare res")) is None)
+    four = [{"from": "b", "to": "s"}, {"from": "s", "to": "b"}] * 2
+    ok("spec: 4 same-row lines between two tiles rejected, not crashed", "at most 3" in (synth_error(lambda s: s.update(edges=four)) or ""))
+
+    # sketch hosts: line offsets must match HTMLParser, which counts only \n
+    pres = load("presentation")
+    src = '<p title="a b">x</p>\n<div class="group" data-id="g">'
+    host = pres.SketchHosts(src, True)
+    ok("presentation: offsets ignore U+2028 line breaks", host.offsets == [0, src.index("\n") + 1])
+
+    # diff: two edges between the same pair are told apart by label
+    b2 = {"nodes": [], "edges": [{"from": "a", "to": "b", "label": "HTTP"}, {"from": "a", "to": "b", "label": "gRPC"}]}
+    h2 = {"nodes": [], "edges": [{"from": "a", "to": "b", "label": "gRPC"}]}
+    r2 = diffmod.diff(b2, h2)
+    ok("diff: dropping one of two parallel edges is reported", r2["edges"]["removed"] == [["a", "b", "HTTP"]] and r2["total"] == 1, str(r2["edges"]))
+
+    # fetch_icons: a malformed URL fails that icon, not the batch
+    r = subprocess.run([PY, str(SCRIPTS / "fetch_icons.py"), str(tmp / "fi"), "x=notaurl"], capture_output=True, text=True)
+    ok("fetch_icons: malformed URL reported without a traceback", "Traceback" not in r.stderr and (tmp / "fi" / "manifest.json").exists(), r.stderr[-300:])
+
     # auto width for Korean names
     ok("layout: long Korean name widens the node", layout.node_width({"name": "재고 데이터베이스 클러스터", "role": ""}) >= 172)
     ok("layout: short Latin name stays default", layout.node_width({"name": "Neon", "role": "PostgreSQL 16"}) == 132)

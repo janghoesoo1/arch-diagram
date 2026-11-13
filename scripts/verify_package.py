@@ -96,6 +96,9 @@ if skill_md.exists():
     desc = re.search(r"^description:\s*(.*)$", fm.group(1), re.MULTILINE).group(1) if fm else ""
     if not fm or not re.search(r"^name:\s*arch-diagram\s*$", fm.group(1), re.MULTILINE):
         err("SKILL.md frontmatter must declare name: arch-diagram")
+    desc_len = len(desc.strip('"'))
+    if desc_len > 1024:
+        err(f"SKILL.md description is {desc_len} chars (Agent Skills cap 1024)")
     for t in TRIGGERS:
         if t.lower() not in desc.lower():
             err(f"SKILL.md description lacks trigger word {t!r}")

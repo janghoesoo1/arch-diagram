@@ -50,8 +50,7 @@ class SketchHosts(HTMLParser):
         self.full = full
         self.insertions = []
         self.offsets = [0]
-        for line in source.splitlines(keepends=True):
-            self.offsets.append(self.offsets[-1] + len(line))
+        self.offsets += [m.end() for m in re.finditer("\n", source)]
 
     def handle_starttag(self, tag, attrs):
         attrs = dict(attrs)

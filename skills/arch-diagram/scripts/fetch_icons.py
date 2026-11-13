@@ -353,7 +353,7 @@ def main():
         for src, url, dark_url in tries:
             try:
                 b = read(url)
-            except (urllib.error.URLError, urllib.error.HTTPError, OSError):
+            except (urllib.error.URLError, OSError, ValueError, http.client.HTTPException):
                 continue
             ext = ext_of(b, url)
             if not ext or len(b) < 50:      # 404 pages, empty bodies
@@ -381,7 +381,7 @@ def main():
         if dark_url:
             try:
                 db = read(dark_url)
-            except (urllib.error.URLError, urllib.error.HTTPError, OSError):
+            except (urllib.error.URLError, OSError, ValueError, http.client.HTTPException):
                 db = b""
             dext = ext_of(db, dark_url) if len(db) >= 50 else None
             if dext:

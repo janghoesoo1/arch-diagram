@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.3.1 — Unreleased
+## 0.3.1 — 2026-11-13
 
 - Spec validation rejects group parent cycles (previously a hang), more than three same-row lines between two tiles (previously a crash), `tile`/`delta` values that are not the documented words (previously written into HTML attributes unescaped) and icon names `fetch_icons.py` cannot produce.
 - `diff.py` tells parallel edges between the same pair apart by label; sketch styles place their SVG correctly when text contains U+2028; a malformed `name=URL` no longer aborts the whole icon batch.

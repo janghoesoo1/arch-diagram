@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- Dark theme no longer swaps a white-tile logo for its white dark-theme variant (Inngest rendered as a blank tile); only `.bare` and `.dark` tiles swap.
+- Korean pages set role lines, edge labels and the legend in the body face: the monospace space beside Hangul read as a double gap.
+- The legend is inset from the figure edge so PNG captures no longer clip its first swatch.
+- README example PNGs re-rendered; `scripts/test_visual_browser.py` guards all three in CI.
+
 ## 0.3.1 — 2026-11-13
 
 - Spec validation rejects group parent cycles (previously a hang), more than three same-row lines between two tiles (previously a crash), `tile`/`delta` values that are not the documented words (previously written into HTML attributes unescaped) and icon names `fetch_icons.py` cannot produce.

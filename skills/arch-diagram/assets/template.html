@@ -80,6 +80,9 @@
   src:url(data:font/woff2;base64,%%FONT_JBM%%) format("woff2"); }
 /* JetBrains Mono reads cramped at 9.5–11px; open every mono label slightly */
 .kicker, .node .role, .el, .legend, .foot { letter-spacing: 0.04em; }
+/* Hangul has no mono glyphs: a mono space (0.6em) beside Pretendard syllables reads as a double gap,
+   so Korean pages set these labels in the body face at natural spacing */
+:lang(ko) .node .role, :lang(ko) .el, :lang(ko) .legend { font-family: var(--font-body); letter-spacing: 0; }
 * { margin:0; padding:0; box-sizing:border-box; }
 html, body { overflow-x: clip; }
 body { background: var(--color-paper); color: var(--color-ink); font-family: var(--font-body);
@@ -117,8 +120,10 @@ h1 { font-family: var(--font-display); font-weight: 700; font-size: clamp(22px, 
 /* group labels sit on the group's tint, not on a white tile: in the dark theme swap in the brand's
    own dark-theme logo (lt/dk pair), or give a mark with black parts a white plate */
 .g-label img.dk, .tile img.dk { display:none; }
-[data-theme="dark"] .g-label img.lt, [data-theme="dark"] .tile img.lt { display:none; }
-[data-theme="dark"] .g-label img.dk, [data-theme="dark"] .tile img.dk { display:block; }
+/* a plain tile stays #fff in both themes, so it keeps the light logo; only tiles that show a dark
+   ground (.bare on the canvas, .dark graphite) swap */
+[data-theme="dark"] .g-label img.lt, [data-theme="dark"] .tile:is(.bare,.dark) img.lt { display:none; }
+[data-theme="dark"] .g-label img.dk, [data-theme="dark"] .tile:is(.bare,.dark) img.dk { display:block; }
 [data-theme="dark"] .g-label img.plate { background:#fff; border-radius:3px; padding:2px; width:18px; height:18px; }
 .group.ga { border:1.5px solid var(--color-g1); background: var(--color-g1-tint); }
 .group.ga-nested { border:1.5px dashed var(--color-g1-soft); }
@@ -194,6 +199,7 @@ path.aws { stroke: var(--color-ink); stroke-width:1.6; fill:none; } /* inside an
 
 /* LEGEND: a horizontal strip under the canvas, never floating inside it ------------------------ */
 .legend { display:flex; gap: var(--space-lg); align-items:center; margin-top: var(--space-md);
+  padding: 0 var(--space-md) var(--space-sm);   /* PNGs crop to .figure: keep swatches off its edge */
   font-family: var(--font-mono); font-size:10px; color: var(--color-muted); flex-wrap:wrap; }
 .legend .sw { display:inline-block; width:30px; vertical-align:middle; margin-right:6px;
   border-top:1.6px solid var(--color-accent); }
